@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>操作日志 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .req-id { display: inline-flex; align-items: center; gap: 6px; }
+  .req-id code { font-family: var(--mono); font-size: 12.5px; background: var(--fill-1); border-radius: 5px; padding: 4px 8px; color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item active" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>操作日志</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">操作日志</h1>
+          <p class="page-desc">查询管理员登录、数据查看和分类维护记录。当前为固定示例，原型操作不会生成真实审计日志。</p>
+        </div>
+        <div class="page-actions">
+          <span class="tag tag-outline" style="height:32px;padding:0 12px">拟建设能力 · 接口未接入</span>
+        </div>
+      </div>
+
+      <div class="banner banner-warn" style="margin-bottom:16px">
+        <svg class="ic"><use href="#i-info"/></svg>
+        <div><b>本模块为拟建设能力：</b>以下为演示数据，用于确认字段与交互；日志采集接口尚未接入，接入后此处不再显示本提示。敏感数据查看（如记账明细授权）也属于应记录的操作。</div>
+      </div>
+
+      <div class="card">
+        <div class="filter-bar">
+          <div class="field">
+            <label class="field-label">操作时间</label>
+            <div class="range">
+              <input class="input" type="date" id="fFrom" value="2026-09-24">
+              <span class="sep">至</span>
+              <input class="input" type="date" id="fTo" value="2026-09-30">
+            </div>
+            <div style="display:flex;gap:6px;margin-top:2px">
+              <button class="btn btn-sm" data-quick="0">今天</button>
+              <button class="btn btn-sm" data-quick="6">近 7 天</button>
+              <button class="btn btn-sm" data-quick="29">近 30 天</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">操作类型</label>
+            <select class="select w-md" id="fType">
+              <option value="">全部类型</option>
+              <option>登录</option><option>数据查询</option><option>敏感数据查看</option><option>分类管理</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">管理员</label>
+            <select class="select w-sm" id="fAdmin">
+              <option value="">全部</option><option>张明</option><option>李雯</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">执行结果</label>
+            <select class="select w-sm" id="fResult">
+              <option value="">全部</option><option>成功</option><option>失败</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" id="btnQuery"><svg class="ic"><use href="#i-search"/></svg>查询</button>
+            <button class="btn" id="btnReset">重置</button>
+          </div>
+        </div>
+
+        <div class="table-toolbar"><span class="note" id="resultNote"></span></div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th>操作时间</th><th>管理员</th><th>操作类型</th><th>目标对象</th><th>执行结果</th><th class="op-cell">操作</th>
+            </tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="emptyHolder"></div>
+        <div class="pager">
+          <span class="total" id="totalCount"></span>
+          <div class="pages">
+            <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-l"/></svg></button>
+            <button class="page-btn on">1</button>
+            <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-r"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 日志详情抽屉 -->
+<div class="mask" id="drawerLog"></div>
+<aside class="drawer" id="drawerLogBody" aria-label="操作详情">
+  <div class="drawer-head">
+    <div class="drawer-title">操作详情</div>
+    <button class="icon-btn" onclick="closeLayer('drawerLog');closeLayer('drawerLogBody')" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="drawer-body" id="drawerContent"></div>
+</aside>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* 演示数据（与数据概览页「最近管理员操作」一致） */
+var LOGS = [
+  { time: '2026-09-30 10:05:12', admin: '张明', type: '敏感数据查看', target: '用户 U10231 · 记账记录 R203101', result: '成功', req: 'req-8f3a2c6b',
+    desc: '授权查看用户记账明细（金额与备注），用途：排查用户反馈问题。授权范围：单条记录。' },
+  { time: '2026-09-30 09:20:41', admin: '李雯', type: '数据查询', target: '用户管理列表', result: '成功', req: 'req-2d91e4af',
+    desc: '查询用户列表，筛选条件：注册时间 2026-09-01 至 2026-09-30。' },
+  { time: '2026-09-30 09:12:08', admin: '张明', type: '登录', target: '管理后台', result: '成功', req: 'req-a17c05dd',
+    desc: '管理员登录成功。' },
+  { time: '2026-09-29 18:40:23', admin: '李雯', type: '分类管理', target: '系统分类「人情」· 停用', result: '成功', req: 'req-5b62f1e8',
+    desc: '停用系统预置支出分类「人情」。停用时该分类已被 690 条历史记录引用，历史数据保留不变。' },
+  { time: '2026-09-29 15:02:57', admin: '张明', type: '数据查询', target: '记账记录（用户 U10244）', result: '成功', req: 'req-c48d20b1',
+    desc: '查询记账记录列表，筛选条件：用户 U10244，日期 2026-09-25 至 2026-09-26。金额保持遮蔽，未授权查看。' },
+  { time: '2026-09-29 11:26:35', admin: '李雯', type: '登录', target: '管理后台', result: '失败', req: 'req-e93a77c2',
+    desc: '登录失败：密码错误（第 1 次）。连续失败 5 次将锁定账号 10 分钟。' },
+  { time: '2026-09-28 16:44:10', admin: '张明', type: '分类管理', target: '系统分类「娱乐」· 排序调整', result: '成功', req: 'req-71f0b9a4',
+    desc: '将支出分类「娱乐」排序由 6 调整为 5。' },
+  { time: '2026-09-28 09:30:19', admin: '张明', type: '数据查询', target: '账本列表', result: '成功', req: 'req-09bd5e63',
+    desc: '查询账本列表，筛选条件：所属用户 U10231。' }
+];
+
+var TYPE_TAG = { '登录': 'tag-gray', '数据查询': 'tag-blue', '敏感数据查看': 'tag-orange', '分类管理': 'tag-blue' };
+var filtered = LOGS.slice();
+
+function render(state) {
+  if (state === 'loading') { $('#tbody').innerHTML = skeletonRows(6); $('#emptyHolder').innerHTML = ''; return; }
+  $('#tbody').innerHTML = filtered.map(function (l, i) {
+    return '<tr>' +
+      '<td class="num">' + l.time + '</td>' +
+      '<td>' + l.admin + '</td>' +
+      '<td><span class="tag ' + TYPE_TAG[l.type] + '">' + l.type + '</span></td>' +
+      '<td>' + l.target + '</td>' +
+      '<td>' + (l.result === '成功' ? '<span class="tag tag-green">成功</span>' : '<span class="tag tag-red">失败</span>') + '</td>' +
+      '<td class="op-cell"><span class="ops"><button class="btn btn-text btn-sm" onclick="openLog(' + i + ')">查看详情</button></span></td>' +
+      '</tr>';
+  }).join('');
+  $('#totalCount').textContent = '共 ' + filtered.length + ' 条 · 演示数据';
+  $('#resultNote').textContent = '共 ' + filtered.length + ' 条记录（演示数据子集）';
+  $('#emptyHolder').innerHTML = filtered.length ? '' : stateBlockHTML('noresult', { btnFn: 'resetFilter()' });
+}
+function apply() {
+  var from = $('#fFrom').value, to = $('#fTo').value;
+  var type = $('#fType').value, admin = $('#fAdmin').value, result = $('#fResult').value;
+  filtered = LOGS.filter(function (l) {
+    var d = l.time.slice(0, 10);
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    if (type && l.type !== type) return false;
+    if (admin && l.admin !== admin) return false;
+    if (result && l.result !== result) return false;
+    return true;
+  });
+}
+$('#btnQuery').addEventListener('click', function () { apply(); simulateQuery(render); });
+window.resetFilter = function () {
+  $('#fFrom').value = '2026-09-24'; $('#fTo').value = '2026-09-30';
+  $('#fType').value = ''; $('#fAdmin').value = ''; $('#fResult').value = '';
+  filtered = LOGS.slice();
+  simulateQuery(render);
+};
+$('#btnReset').addEventListener('click', resetFilter);
+
+$$('[data-quick]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var days = +b.getAttribute('data-quick');
+    var to = new Date(2026, 8, 30), from = new Date(2026, 8, 30 - days);
+    var f = function (d) { return d.toISOString().slice(0, 10); };
+    $('#fFrom').value = f(from); $('#fTo').value = f(to);
+  });
+});
+
+window.openLog = function (i) {
+  var l = filtered[i];
+  $('#drawerContent').innerHTML =
+    '<div class="d-section"><div class="d-section-title">操作摘要</div>' +
+    '<dl class="desc-list">' +
+    '<dt>操作时间</dt><dd class="num">' + l.time + '</dd>' +
+    '<dt>管理员</dt><dd>' + l.admin + '</dd>' +
+    '<dt>操作类型</dt><dd><span class="tag ' + TYPE_TAG[l.type] + '">' + l.type + '</span></dd>' +
+    '<dt>目标对象</dt><dd>' + l.target + '</dd>' +
+    '<dt>执行结果</dt><dd>' + (l.result === '成功' ? '<span class="tag tag-green">成功</span>' : '<span class="tag tag-red">失败</span>') + '</dd>' +
+    '<dt>说明</dt><dd style="line-height:1.7">' + l.desc + '</dd>' +
+    '</dl></div>' +
+    '<div class="d-section"><div class="d-section-title">请求标识</div>' +
+    '<div class="req-id"><code>' + l.req + '</code>' +
+    '<button class="icon-btn sm" title="复制" onclick="copyText(\'' + l.req + '\')"><svg class="ic"><use href="#i-copy"/></svg></button></div>' +
+    '<div class="text-3" style="font-size:12px;margin-top:8px">用于问题排查时与服务端日志对齐。</div></div>' +
+    '<div class="banner banner-info" style="margin-top:4px"><svg class="ic"><use href="#i-shield"/></svg>' +
+    '<div>出于安全要求，日志不记录密码、令牌、密钥及原始敏感请求内容；摘要仅保留排查所需的最小信息。</div></div>';
+  openLayer('drawerLog'); openLayer('drawerLogBody');
+};
+$('#drawerLog').addEventListener('click', function () { closeLayer('drawerLog'); closeLayer('drawerLogBody'); });
+
+render('done');
+</script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据概览 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item active" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>数据概览</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">数据概览</h1>
+          <p class="page-desc">小程序整体使用情况。本页为高保真原型，以下均为演示数据，不代表真实指标。</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn" id="btnRefresh"><svg class="ic"><use href="#i-refresh"/></svg>刷新</button>
+        </div>
+      </div>
+
+      <!-- 指标卡 -->
+      <div class="metric-grid">
+        <div class="card metric-card">
+          <div class="metric-label"><svg class="ic ic-sm"><use href="#i-user"/></svg>累计用户</div>
+          <div class="metric-value tnum">12,847<span class="unit">人</span></div>
+          <div class="metric-foot">统计周期：上线起至 2026-09-30 10:00</div>
+        </div>
+        <div class="card metric-card">
+          <div class="metric-label"><svg class="ic ic-sm"><use href="#i-plus"/></svg>今日新增用户</div>
+          <div class="metric-value tnum">36<span class="unit">人</span></div>
+          <div class="metric-foot">今日 00:00–10:00 <span class="delta up"><svg class="ic"><use href="#i-up"/></svg>较昨日同期 +4</span></div>
+        </div>
+        <div class="card metric-card">
+          <div class="metric-label"><svg class="ic ic-sm"><use href="#i-edit"/></svg>今日记账笔数</div>
+          <div class="metric-value tnum">1,892<span class="unit">笔</span></div>
+          <div class="metric-foot">今日 00:00–10:00 <span class="delta down"><svg class="ic"><use href="#i-down"/></svg>较昨日同期 -86</span></div>
+        </div>
+        <div class="card metric-card">
+          <div class="metric-label"><svg class="ic ic-sm"><use href="#i-book"/></svg>累计账本数</div>
+          <div class="metric-value tnum">31,206<span class="unit">本</span></div>
+          <div class="metric-foot">截至 2026-09-30 10:00 · 户均 2.4 本</div>
+        </div>
+      </div>
+
+      <div class="ov-grid">
+        <!-- 左列：趋势 -->
+        <div class="ov-col">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">使用趋势</div>
+                <div class="card-sub" id="trendRange">统计周期：2026-09-24 至 2026-09-30</div>
+              </div>
+              <div class="spacer"></div>
+              <div class="seg" id="trendSeg">
+                <button class="seg-btn active" data-range="7">最近 7 天</button>
+                <button class="seg-btn" data-range="30">最近 30 天</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="trend-duo">
+                <div>
+                  <div class="chart-title">新增用户</div>
+                  <div class="chart-unit">单位：人 / 日</div>
+                  <div class="chart-box" id="chartUsers" style="height:220px"></div>
+                </div>
+                <div>
+                  <div class="chart-title">记账笔数</div>
+                  <div class="chart-unit">单位：笔 / 日</div>
+                  <div class="chart-box" id="chartRecords" style="height:220px"></div>
+                </div>
+              </div>
+              <div class="banner banner-info" style="margin-top:16px">
+                <svg class="ic"><use href="#i-info"/></svg>
+                <div>活跃、留存及预算使用率指标<b>待接入</b>。本页仅展示使用概况，不汇总用户个人收支金额。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右列：服务状态 + 最近操作 -->
+        <div class="ov-col">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">服务状态摘要 <span class="tag tag-orange">模拟数据</span></div>
+              <div class="spacer"></div>
+              <a class="link" href="system.html" style="font-size:12.5px">详情</a>
+            </div>
+            <div class="card-body" style="padding-top:6px;padding-bottom:10px">
+              <div class="svc-row">
+                <span class="status ok"><i></i>正常</span>
+                <span class="name">后端服务 <span class="meta">chai-api v2.4.1</span></span>
+              </div>
+              <div class="svc-row">
+                <span class="status ok"><i></i>正常</span>
+                <span class="name">数据库 <span class="meta">MySQL 8.0</span></span>
+              </div>
+              <div class="svc-row">
+                <span class="status off"><i></i>未接入</span>
+                <span class="name">Redis <span class="meta">监测待建设</span></span>
+              </div>
+              <div class="svc-row">
+                <span class="status unknown"><i></i>未知</span>
+                <span class="name">小程序端版本 <span class="meta">暂无法自动探测</span></span>
+              </div>
+              <div class="meta" style="font-size:12px;color:var(--text-3);padding-top:8px">示例检查时间：2026-09-30 10:02:15<br>未连接真实服务，状态不代表生产现状。</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">最近管理员操作</div>
+              <span class="tag tag-outline">拟建设</span>
+              <div class="spacer"></div>
+              <a class="link" href="logs.html" style="font-size:12.5px">全部</a>
+            </div>
+            <div class="card-body" style="padding-top:4px;padding-bottom:10px">
+              <div class="op-row"><span class="t">09-30 10:05</span><span class="who">张明</span><span class="what">敏感数据查看 · 用户 U10231 记账明细</span><span class="tag tag-green">成功</span></div>
+              <div class="op-row"><span class="t">09-30 09:20</span><span class="who">李雯</span><span class="what">数据查询 · 用户管理列表</span><span class="tag tag-green">成功</span></div>
+              <div class="op-row"><span class="t">09-30 09:12</span><span class="who">张明</span><span class="what">登录系统</span><span class="tag tag-green">成功</span></div>
+              <div class="op-row"><span class="t">09-29 18:40</span><span class="who">李雯</span><span class="what">分类管理 · 停用系统分类「人情」</span><span class="tag tag-green">成功</span></div>
+              <div class="op-row"><span class="t">09-28 17:08</span><span class="who">李雯</span><span class="what">登录系统（密码错误）</span><span class="tag tag-red">失败</span></div>
+              <div style="font-size:11.5px;color:var(--text-3);padding-top:8px">操作日志模块为拟建设能力，当前为演示数据。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  function labels(n) {
+    var arr = [];
+    for (var i = n - 1; i >= 0; i--) {
+      var d = new Date(2026, 8, 30 - i);
+      arr.push((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate());
+    }
+    return arr;
+  }
+  var DATA = {
+    7: {
+      users: [28, 35, 41, 32, 38, 44, 36],
+      records: [1720, 1850, 1690, 1905, 2040, 2210, 1892]
+    },
+    30: {
+      users: [19, 22, 18, 25, 29, 33, 27, 21, 24, 30, 35, 38, 29, 23, 26, 32, 37, 41, 33, 25, 27, 34, 39, 44, 37, 28, 31, 38, 42, 36],
+      records: [1480, 1520, 1390, 1610, 1705, 1830, 1590, 1420, 1500, 1660, 1780, 1855, 1620, 1470, 1540, 1710, 1840, 1960, 1730, 1560, 1620, 1770, 1890, 2010, 1870, 1650, 1720, 1880, 2030, 1892]
+    }
+  };
+  var cur = 7;
+  function render() {
+    drawLineChart($('#chartUsers'), labels(cur), DATA[cur].users, { name: '新增用户', unit: '人' });
+    drawBarChart($('#chartRecords'), labels(cur), DATA[cur].records, { name: '记账笔数', unit: '笔' });
+    var rng = cur === 7 ? '2026-09-24 至 2026-09-30' : '2026-09-01 至 2026-09-30';
+    $('#trendRange').textContent = '统计周期：' + rng + (cur === 7 ? '' : '（今日截至 10:00）');
+  }
+  render();
+  $$('#trendSeg .seg-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      $$('#trendSeg .seg-btn').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      cur = +b.getAttribute('data-range');
+      render();
+    });
+  });
+
+  $('#btnRefresh').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin" style="border-color:rgba(0,122,255,.25);border-top-color:var(--primary)"></span>刷新中';
+    setTimeout(function () {
+      btn.disabled = false;
+      btn.innerHTML = '<svg class="ic"><use href="#i-refresh"/></svg>刷新';
+      render();
+      toast('已刷新演示数据，未执行真实服务检查', 'ok');
+    }, 700);
+  });
+})();
+</script>
+</body>
+</html>

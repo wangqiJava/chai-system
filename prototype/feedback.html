@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用户反馈 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .step-list { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 14px; position: relative; padding-bottom: 22px; }
+  .step:last-child { padding-bottom: 0; }
+  .step .no {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background: var(--primary-light); color: var(--primary);
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .step:not(:last-child)::before {
+    content: ""; position: absolute; left: 12.5px; top: 26px; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .step b { font-size: 14px; font-weight: 500; }
+  .step p { font-size: 12.5px; color: var(--text-3); margin-top: 3px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item active" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>用户反馈</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">用户反馈</h1>
+          <p class="page-desc">用户反馈在微信小程序后台查看与处理，本系统提供核查指引。</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns: 1fr 380px; gap:16px; align-items:start">
+        <div class="card">
+          <div class="card-head"><div class="card-title">处理指引</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step">
+                <span class="no">1</span>
+                <div><b>登录微信公众平台</b>
+                <p>使用「柴记账」小程序管理员微信扫码登录 mp.weixin.qq.com。</p></div>
+              </div>
+              <div class="step">
+                <span class="no">2</span>
+                <div><b>进入小程序后台的反馈入口</b>
+                <p>在「用户反馈」相关页面查看用户通过小程序原生反馈能力提交的意见与问题。</p></div>
+              </div>
+              <div class="step">
+                <span class="no">3</span>
+                <div><b>需要核查数据时回到本系统</b>
+                <p>若反馈涉及具体用户数据问题，可在本系统「用户管理 / 业务数据查询」中按用户 ID 核对（敏感明细需授权查看并留痕）。</p></div>
+              </div>
+            </div>
+            <div style="margin-top:22px;display:flex;gap:10px">
+              <a class="btn btn-primary" href="https://mp.weixin.qq.com" target="_blank" rel="noopener">
+                前往微信小程序后台
+                <svg class="ic ic-sm"><use href="#i-link"/></svg>
+              </a>
+              <a class="btn" href="users.html">去用户管理核查</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">边界说明</div></div>
+          <div class="card-body" style="font-size:13px;color:var(--text-2);line-height:1.8">
+            本管理后台<b>不建设</b>以下能力，避免与微信原生能力重复或凭空新增：<br>
+            · 反馈列表 / 工单中心同步展示<br>
+            · 在线客服会话<br>
+            · 对用户的消息推送回复<br>
+            <div class="banner banner-info" style="margin-top:14px">
+              <svg class="ic"><use href="#i-info"/></svg>
+              <div>反馈详情以微信小程序后台为准。本系统不自动同步反馈，也不复制反馈原文。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

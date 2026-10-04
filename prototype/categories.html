@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分类管理 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .panel { padding: 0 0 8px; }
+  .panel .filter-bar { padding-top: 16px; align-items: center; }
+  .order-cell { display: inline-flex; align-items: center; gap: 6px; }
+  .order-num { width: 22px; height: 22px; border-radius: 5px; background: var(--fill-1); color: var(--text-2); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); }
+  .icon-picked { display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item active" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>分类管理</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">分类管理</h1>
+          <p class="page-desc">维护记账的系统预置分类（对全体用户生效）。用户自定义分类仅提供只读查询，两者分开管理、不混排。</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs" data-tabs>
+          <div class="tab-item active" data-tab="sys">系统预置分类</div>
+          <div class="tab-item" data-tab="custom">用户自定义分类<span class="count">只读</span></div>
+        </div>
+
+        <!-- 系统预置分类 -->
+        <div class="panel" data-panel="sys">
+          <div class="filter-bar">
+            <div class="field">
+              <label class="field-label">类型</label>
+              <div class="seg" id="typeSeg">
+                <button class="seg-btn active" data-type="支出">支出</button>
+                <button class="seg-btn" data-type="收入">收入</button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">搜索</label>
+              <div class="input-icon">
+                <svg class="ic"><use href="#i-search"/></svg>
+                <input class="input w-md" id="sysKw" placeholder="搜索分类名称">
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-primary" id="btnAdd"><svg class="ic"><use href="#i-plus"/></svg>新增分类</button>
+            </div>
+          </div>
+          <div class="table-toolbar">
+            <span class="note" id="sysNote"></span>
+          </div>
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>图标</th><th>名称</th><th>类型</th><th>排序</th>
+                <th class="num-h">被引用次数</th><th>状态</th><th>更新时间</th><th class="op-cell">操作</th>
+              </tr></thead>
+              <tbody id="sysBody"></tbody>
+            </table>
+          </div>
+          <div id="sysEmpty"></div>
+          <div class="pager">
+            <span class="total" id="sysTotal"></span>
+            <div class="pages">
+              <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-l"/></svg></button>
+              <button class="page-btn on">1</button>
+              <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-r"/></svg></button>
+            </div>
+          </div>
+          <div style="padding:0 20px 14px">
+            <div class="banner banner-info">
+              <svg class="ic"><use href="#i-info"/></svg>
+              <div>系统预置分类对全体用户的记账与统计生效。被历史记录引用的分类只支持<b>停用</b>（历史数据保留），不提供直接删除。</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 用户自定义分类（只读） -->
+        <div class="panel" data-panel="custom" hidden>
+          <div class="filter-bar">
+            <div class="field">
+              <label class="field-label">所属用户</label>
+              <input class="input w-sm num" id="cuUser" placeholder="如 U10231">
+            </div>
+            <div class="field">
+              <label class="field-label">关键词</label>
+              <div class="input-icon">
+                <svg class="ic"><use href="#i-search"/></svg>
+                <input class="input w-md" id="cuKw" placeholder="搜索分类名称">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">类型</label>
+              <select class="select w-sm" id="cuType">
+                <option value="">全部</option><option>支出</option><option>收入</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-primary" id="cuQuery"><svg class="ic"><use href="#i-search"/></svg>查询</button>
+              <button class="btn" id="cuReset">重置</button>
+            </div>
+          </div>
+          <div class="table-toolbar"><span class="note" id="cuNote"></span></div>
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>所属用户</th><th>名称</th><th>类型</th><th class="num-h">引用次数</th><th>创建时间</th>
+              </tr></thead>
+              <tbody id="cuBody"></tbody>
+            </table>
+          </div>
+          <div id="cuEmpty"></div>
+          <div class="pager"><span class="total" id="cuTotal"></span></div>
+          <div style="padding:0 20px 14px">
+            <div class="banner banner-warn">
+              <svg class="ic"><use href="#i-eyeoff"/></svg>
+              <div>用户自定义分类属于用户个人数据，管理端<b>只读查询</b>，不在此新增、编辑或停用；如用户反馈分类异常，请在用户详情中核对关联数据。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 新增 / 编辑分类弹窗（共用） -->
+<div class="modal-wrap" id="modalCat">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="catModalTitle">新增分类</div>
+      <button class="icon-btn" data-close="modalCat" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field col-2">
+          <label class="field-label">图标<span class="req">*</span></label>
+          <div class="icon-grid" id="iconGrid"></div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="catName">名称<span class="req">*</span></label>
+          <input class="input" id="catName" placeholder="2–6 个字符" maxlength="6" aria-describedby="catError">
+        </div>
+        <div class="field">
+          <label class="field-label">类型</label>
+          <div class="radio-line" id="catType" style="height:32px;align-items:center">
+            <span class="radio on" data-v="支出"><i></i>支出</span>
+            <span class="radio" data-v="收入"><i></i>收入</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="catOrder">排序（数字越小越靠前）</label>
+          <input class="input num" id="catOrder" type="number" min="1" max="99" step="1" value="1" aria-describedby="catError">
+        </div>
+        <div class="field">
+          <label class="field-label">状态</label>
+          <div style="height:32px;display:flex;align-items:center;gap:8px">
+            <button type="button" class="switch on" id="catSwitch" aria-label="启用状态"></button>
+            <span class="text-3" style="font-size:12.5px" id="catSwitchLabel">启用</span>
+          </div>
+        </div>
+      </div>
+      <p class="field-error" id="catError" role="alert" hidden></p>
+      <div class="confirm-scope" id="catEditLock" style="display:none">
+        已被 <b id="catRefs"></b> 条历史记录引用。编辑仅修改名称、图标和排序；类型保持不变。启停请使用列表操作，停用前须确认影响范围。
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" data-close="modalCat">取消</button>
+      <button class="btn btn-primary" id="catSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 停用确认弹窗 -->
+<div class="modal-wrap" id="modalDisable">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="confirm-icon warn"><svg class="ic"><use href="#i-warn"/></svg></div>
+      <div class="modal-title">停用系统分类</div>
+      <button class="icon-btn" data-close="modalDisable" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13.5px;line-height:1.7" id="disableText"></div>
+      <div class="confirm-scope">
+        <b>影响范围</b><br>
+        · 停用后，用户在小程序中新记账时<b>不再出现</b>该分类；<br>
+        · 已引用该分类的历史记录与统计<b>保留不变</b>；<br>
+        · 停用操作将记录到操作日志，可随时重新启用。
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" data-close="modalDisable">取消</button>
+      <button class="btn btn-primary" id="disableConfirm">确认停用</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ================= 演示数据 ================= */
+var ICONS = ['i-bowl', 'i-car', 'i-bag', 'i-home', 'i-play', 'i-med', 'i-edu', 'i-gift', 'i-paw', 'i-dots', 'i-cash', 'i-medal', 'i-pie', 'i-case', 'i-envelope'];
+var SYS = [
+  { icon: 'i-bowl', name: '餐饮', type: '支出', order: 1, refs: 9842, status: '启用', updated: '2026-05-11 10:02' },
+  { icon: 'i-car', name: '交通', type: '支出', order: 2, refs: 6231, status: '启用', updated: '2026-05-11 10:02' },
+  { icon: 'i-bag', name: '购物', type: '支出', order: 3, refs: 5804, status: '启用', updated: '2026-05-11 10:03' },
+  { icon: 'i-home', name: '居住', type: '支出', order: 4, refs: 3120, status: '启用', updated: '2026-05-11 10:03' },
+  { icon: 'i-play', name: '娱乐', type: '支出', order: 5, refs: 2386, status: '启用', updated: '2026-09-27 10:14' },
+  { icon: 'i-med', name: '医疗', type: '支出', order: 6, refs: 864, status: '启用', updated: '2026-05-11 10:04' },
+  { icon: 'i-edu', name: '教育', type: '支出', order: 7, refs: 752, status: '启用', updated: '2026-05-11 10:04' },
+  { icon: 'i-gift', name: '人情', type: '支出', order: 8, refs: 690, status: '停用', updated: '2026-09-27 18:40' },
+  { icon: 'i-paw', name: '宠物', type: '支出', order: 9, refs: 214, status: '启用', updated: '2026-05-11 10:05' },
+  { icon: 'i-dots', name: '其他支出', type: '支出', order: 10, refs: 102, status: '启用', updated: '2026-05-11 10:05' },
+  { icon: 'i-cash', name: '工资', type: '收入', order: 1, refs: 4102, status: '启用', updated: '2026-05-11 10:06' },
+  { icon: 'i-pie', name: '理财', type: '收入', order: 2, refs: 1257, status: '启用', updated: '2026-05-11 10:06' },
+  { icon: 'i-medal', name: '奖金', type: '收入', order: 3, refs: 618, status: '启用', updated: '2026-05-11 10:07' },
+  { icon: 'i-envelope', name: '红包', type: '收入', order: 4, refs: 527, status: '启用', updated: '2026-05-11 10:07' },
+  { icon: 'i-case', name: '兼职', type: '收入', order: 5, refs: 342, status: '启用', updated: '2026-05-11 10:08' },
+  { icon: 'i-dots', name: '其他收入', type: '收入', order: 6, refs: 96, status: '启用', updated: '2026-05-11 10:08' }
+];
+var USER_MAP = { U10231: '晓婷爱存钱', U10232: '思远的账本', U10233: '小林不剁手', U10244: '墨墨记账', U10251: '晴天的钱包', U10258: '翔哥省钱记', U10266: '琪琪的小金库', U10271: '楠得糊涂' };
+var CUSTOM = [
+  { uid: 'U10231', name: '奶茶咖啡', type: '支出', refs: 86, created: '2026-06-02 14:20' },
+  { uid: 'U10233', name: '基金定投', type: '支出', refs: 27, created: '2026-06-18 09:12' },
+  { uid: 'U10244', name: '宝宝用品', type: '支出', refs: 63, created: '2026-07-15 11:42' },
+  { uid: 'U10266', name: '追星应援', type: '支出', refs: 9, created: '2026-09-20 23:05' },
+  { uid: 'U10232', name: '游戏氪金', type: '支出', refs: 41, created: '2026-05-20 20:31' },
+  { uid: 'U10258', name: '副业稿费', type: '收入', refs: 12, created: '2026-08-30 16:08' }
+];
+
+/* ================= 系统预置分类 ================= */
+var curType = '支出';
+function sysFiltered() {
+  var kw = $('#sysKw').value.trim();
+  return SYS.filter(function (c) {
+    return c.type === curType && (!kw || c.name.indexOf(kw) >= 0);
+  }).slice().sort(function (a, b) { return a.order - b.order; });
+}
+function renderSys(state) {
+  if (state === 'loading') { $('#sysBody').innerHTML = skeletonRows(8); $('#sysEmpty').innerHTML = ''; return; }
+  var list = sysFiltered();
+  $('#sysBody').innerHTML = list.map(function (c, idx) {
+    var on = c.status === '启用';
+    return '<tr>' +
+      '<td><span class="cat-icon"><svg class="ic"><use href="#' + c.icon + '"/></svg></span></td>' +
+      '<td style="font-weight:500">' + escapeHTML(c.name) + '</td>' +
+      '<td><span class="tag ' + (c.type === '支出' ? 'tag-red' : 'tag-green') + '"><i class="dot"></i>' + c.type + '</span></td>' +
+      '<td><span class="order-cell"><span class="order-num">' + c.order + '</span>' +
+        '<button class="icon-btn sm" title="上移" onclick="moveCat(\'' + c.type + '\',' + (SYS.indexOf(c)) + ',-1)"' + (idx === 0 ? ' disabled' : '') + '><svg class="ic"><use href="#i-up"/></svg></button>' +
+        '<button class="icon-btn sm" title="下移" onclick="moveCat(\'' + c.type + '\',' + (SYS.indexOf(c)) + ',1)"' + (idx === list.length - 1 ? ' disabled' : '') + '><svg class="ic"><use href="#i-down"/></svg></button>' +
+      '</span></td>' +
+      '<td class="num-cell num">' + fmtNum(c.refs) + '</td>' +
+      '<td>' + (on ? '<span class="tag tag-green">启用</span>' : '<span class="tag tag-gray">停用</span>') + '</td>' +
+      '<td class="num">' + c.updated + '</td>' +
+      '<td class="op-cell"><span class="ops">' +
+        '<button id="cat-edit-' + SYS.indexOf(c) + '" class="btn btn-text btn-sm" onclick="openCatEditor(' + SYS.indexOf(c) + ')">编辑</button>' +
+        (on
+          ? '<button id="cat-status-' + SYS.indexOf(c) + '" class="btn btn-text btn-sm danger" onclick="askDisable(' + SYS.indexOf(c) + ')">停用</button>'
+          : '<button id="cat-status-' + SYS.indexOf(c) + '" class="btn btn-text btn-sm" onclick="enableCat(' + SYS.indexOf(c) + ')">启用</button>') +
+      '</span></td></tr>';
+  }).join('');
+  $('#sysNote').textContent = curType + '分类 ' + list.length + ' 项 · 停用 ' + list.filter(function (c) { return c.status === '停用'; }).length + ' 项（演示数据）';
+  $('#sysTotal').textContent = '共 ' + list.length + ' 条 · 演示数据';
+  $('#sysEmpty').innerHTML = list.length ? '' : stateBlockHTML('noresult', { btnFn: 'sysClearKw()' });
+}
+window.sysClearKw = function () { $('#sysKw').value = ''; renderSys('done'); };
+$$('#typeSeg .seg-btn').forEach(function (b) {
+  b.addEventListener('click', function () {
+    $$('#typeSeg .seg-btn').forEach(function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    curType = b.getAttribute('data-type');
+    simulateQuery(renderSys, 300);
+  });
+});
+$('#sysKw').addEventListener('input', function () { renderSys('done'); });
+
+/* 排序 */
+window.moveCat = function (type, index, dir) {
+  var sameType = SYS.map(function (c, i) { return { c: c, i: i }; }).filter(function (x) { return x.c.type === type; }).sort(function (a, b) { return a.c.order - b.c.order; });
+  var pos = sameType.map(function (x) { return x.i; }).indexOf(index);
+  var swapWith = sameType[pos + dir];
+  if (!swapWith) return;
+  var a = SYS[index], b = SYS[swapWith.i];
+  var t = a.order; a.order = b.order; b.order = t;
+  a.updated = b.updated = '2026-09-30 10:20';
+  renderSys('done');
+  toast('已调整「' + a.name + '」排序（演示环境不落库，操作将记入日志）', 'ok');
+};
+
+/* 新增 / 编辑弹窗（共用） */
+var editIndex = -1; // -1 = 新增
+var pickedIcon = ICONS[0];
+(function buildIconGrid() {
+  $('#iconGrid').innerHTML = ICONS.map(function (id) {
+    return '<button type="button" class="icon-cell" data-icon="' + id + '" title="' + id + '" aria-label="分类图标 ' + id + '"><svg class="ic"><use href="#' + id + '"/></svg></button>';
+  }).join('');
+  $$('#iconGrid .icon-cell').forEach(function (cell) {
+    cell.addEventListener('click', function () {
+      $$('#iconGrid .icon-cell').forEach(function (x) { x.classList.remove('on'); });
+      cell.classList.add('on');
+      pickedIcon = cell.getAttribute('data-icon');
+    });
+  });
+})();
+function setIcon(id) {
+  pickedIcon = id;
+  $$('#iconGrid .icon-cell').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-icon') === id); });
+}
+function setTypeRadio(v) {
+  $$('#catType .radio').forEach(function (r) {
+    var selected = r.getAttribute('data-v') === v;
+    r.classList.toggle('on', selected);
+    r.setAttribute('role', 'radio');
+    r.setAttribute('aria-checked', String(selected));
+    r.setAttribute('aria-disabled', String(editIndex >= 0));
+    r.tabIndex = editIndex >= 0 ? -1 : 0;
+  });
+}
+$('#catType').setAttribute('role', 'radiogroup');
+$('#catType').setAttribute('aria-label', '分类类型');
+$$('#catType .radio').forEach(function (r) {
+  r.addEventListener('click', function () { if (editIndex < 0) setTypeRadio(r.getAttribute('data-v')); });
+  r.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); r.click(); }
+  });
+});
+$('#catSwitch').addEventListener('click', function () {
+  this.classList.toggle('on');
+  this.setAttribute('aria-checked', String(this.classList.contains('on')));
+  $('#catSwitchLabel').textContent = this.classList.contains('on') ? '启用' : '停用';
+});
+window.openCatEditor = function (index) {
+  editIndex = index;
+  var c = index >= 0 ? SYS[index] : null;
+  $('#catModalTitle').textContent = c ? '编辑分类' + ' · ' + c.name : '新增' + curType + '分类';
+  $('#catName').value = c ? c.name : '';
+  $('#catOrder').value = c ? c.order : Math.min(99, Math.max.apply(null, [0].concat(SYS.filter(function (item) { return item.type === curType; }).map(function (item) { return item.order; }))) + 1);
+  $('#catSwitch').classList.toggle('on', !c || c.status === '启用');
+  $('#catSwitchLabel').textContent = (!c || c.status === '启用') ? '启用' : '停用';
+  $('#catSwitch').disabled = !!c;
+  $('#catSwitch').setAttribute('role', 'switch');
+  $('#catSwitch').setAttribute('aria-checked', String(!c || c.status === '启用'));
+  setTypeRadio(c ? c.type : curType);
+  setIcon(c ? c.icon : 'i-dots');
+  $('#catEditLock').style.display = c ? '' : 'none';
+  if (c) $('#catRefs').textContent = fmtNum(c.refs);
+  $('#catName').classList.remove('err');
+  $('#catName').removeAttribute('aria-invalid');
+  $('#catOrder').removeAttribute('aria-invalid');
+  $('#catError').hidden = true;
+  openLayer('modalCat');
+};
+$('#btnAdd').addEventListener('click', function () { openCatEditor(-1); });
+$('#catSave').addEventListener('click', function () {
+  var name = $('#catName').value.trim();
+  var type = $('#catType .radio.on').getAttribute('data-v');
+  var order = Number($('#catOrder').value);
+  var error = '';
+  var field = $('#catName');
+  if (name.length < 2 || name.length > 6) error = '分类名称须为 2–6 个字符';
+  else if (/[<>]/.test(name)) error = '分类名称不能包含尖括号';
+  else if (SYS.some(function (c, index) { return index !== editIndex && c.type === type && c.name === name; })) error = '同类型下已存在该分类名称';
+  else if (!Number.isInteger(order) || order < 1 || order > 99) { error = '排序须为 1–99 的整数'; field = $('#catOrder'); }
+  if (error) {
+    $('#catError').textContent = error; $('#catError').hidden = false;
+    field.setAttribute('aria-invalid', 'true'); field.focus(); return;
+  }
+  var status = $('#catSwitch').classList.contains('on') ? '启用' : '停用';
+  if (editIndex >= 0) {
+    var c = SYS[editIndex];
+    c.name = name; c.order = order; c.icon = pickedIcon;
+    c.updated = '2026-09-30 10:21';
+    toast('已保存分类「' + name + '」（演示环境不落库）', 'ok');
+  } else {
+    SYS.push({ icon: pickedIcon, name: name, type: type, order: order, refs: 0, status: status, updated: '2026-09-30 10:21' });
+    if (type !== curType) { $$('#typeSeg .seg-btn').forEach(function (x) { x.classList.toggle('active', x.getAttribute('data-type') === type); }); curType = type; }
+    toast('已新增分类「' + name + '」（演示环境不落库）', 'ok');
+  }
+  closeLayer('modalCat');
+  renderSys('done');
+});
+
+/* 停用 / 启用 */
+var disableIndex = -1;
+window.askDisable = function (index) {
+  disableIndex = index;
+  var c = SYS[index];
+  $('#disableText').innerHTML = c.refs > 0
+    ? '分类「<b>' + c.name + '</b>」已被 <b class="num">' + fmtNum(c.refs) + '</b> 条历史记账记录引用。'
+    : '分类「<b>' + c.name + '</b>」尚未被任何记录引用。';
+  openLayer('modalDisable');
+};
+$('#disableConfirm').addEventListener('click', function () {
+  var c = SYS[disableIndex];
+  c.status = '停用'; c.updated = '2026-09-30 10:22';
+  closeLayer('modalDisable');
+  renderSys('done');
+  toast('已停用「' + c.name + '」，历史记录保留不变（演示）', 'ok');
+});
+window.enableCat = function (index) {
+  var c = SYS[index];
+  c.status = '启用'; c.updated = '2026-09-30 10:23';
+  renderSys('done');
+  toast('已启用「' + c.name + '」（演示）', 'ok');
+};
+
+/* ================= 用户自定义分类（只读） ================= */
+var cuFiltered = CUSTOM.slice();
+function renderCustom(state) {
+  if (state === 'loading') { $('#cuBody').innerHTML = skeletonRows(5); $('#cuEmpty').innerHTML = ''; return; }
+  $('#cuBody').innerHTML = cuFiltered.map(function (c) {
+    return '<tr>' +
+      '<td><a class="link" href="users.html?uid=' + c.uid + '">' + USER_MAP[c.uid] + '</a><div class="cell-sub num">' + c.uid + '</div></td>' +
+      '<td>' + c.name + '</td>' +
+      '<td><span class="tag ' + (c.type === '支出' ? 'tag-red' : 'tag-green') + '"><i class="dot"></i>' + c.type + '</span></td>' +
+      '<td class="num-cell num">' + c.refs + '</td>' +
+      '<td class="num">' + c.created + '</td></tr>';
+  }).join('');
+  $('#cuNote').textContent = '共 ' + cuFiltered.length + ' 条（演示数据子集）';
+  $('#cuTotal').textContent = '共 ' + cuFiltered.length + ' 条 · 演示数据';
+  $('#cuEmpty').innerHTML = cuFiltered.length ? '' : stateBlockHTML('noresult', { btnFn: 'cuReset()' });
+}
+function cuApply() {
+  var uid = $('#cuUser').value.trim().toUpperCase();
+  var kw = $('#cuKw').value.trim();
+  var type = $('#cuType').value;
+  cuFiltered = CUSTOM.filter(function (c) {
+    if (uid && c.uid.indexOf(uid) < 0) return false;
+    if (kw && c.name.indexOf(kw) < 0) return false;
+    if (type && c.type !== type) return false;
+    return true;
+  });
+}
+$('#cuQuery').addEventListener('click', function () { cuApply(); simulateQuery(renderCustom); });
+window.cuReset = function () {
+  $('#cuUser').value = ''; $('#cuKw').value = ''; $('#cuType').value = '';
+  cuFiltered = CUSTOM.slice();
+  simulateQuery(renderCustom);
+};
+$('#cuReset').addEventListener('click', cuReset);
+
+renderSys('done'); renderCustom('done');
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>系统状态 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .svc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .svc-card { padding: 20px; }
+  .svc-card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .svc-card .head .cat-icon { width: 38px; height: 38px; border-radius: 10px; }
+  .svc-card .head .cat-icon .ic { width: 20px; height: 20px; }
+  .svc-card .head b { font-size: 15px; }
+  .svc-card .head .meta { font-size: 12px; color: var(--text-3); }
+  .svc-card.off { border-style: dashed; background: var(--fill-1); }
+  .svc-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 12.5px; }
+  .svc-rows .k { color: var(--text-3); }
+  .svc-rows .v { color: var(--text-1); text-align: right; }
+  @media (max-width: 1280px) { .svc-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item active" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>系统状态</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">系统状态</h1>
+          <p class="page-desc">只读状态原型。数值与正常状态均为模拟数据，未连接生产服务，也不执行运维操作。</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn" id="btnRefresh"><svg class="ic"><use href="#i-refresh"/></svg>模拟检查</button>
+        </div>
+      </div>
+
+      <div class="svc-grid" style="margin-bottom:16px">
+        <div class="card svc-card">
+          <div class="head">
+            <span class="cat-icon"><svg class="ic"><use href="#i-server"/></svg></span>
+            <div style="flex:1"><b>后端服务</b><div class="meta">chai-api · 管理接口与小程序接口</div></div>
+            <span class="status ok"><i></i>正常（模拟）</span>
+          </div>
+          <div class="svc-rows">
+            <span class="k">版本</span><span class="v num">v2.4.1</span>
+            <span class="k">健康实例</span><span class="v num">2 / 2</span>
+            <span class="k">接口平均耗时</span><span class="v num">86 ms</span>
+            <span class="k">最近检查</span><span class="v num" id="chk1">2026-09-30 10:02:15</span>
+          </div>
+        </div>
+
+        <div class="card svc-card">
+          <div class="head">
+            <span class="cat-icon"><svg class="ic"><use href="#i-database"/></svg></span>
+            <div style="flex:1"><b>数据库</b><div class="meta">MySQL 8.0 · 业务主库</div></div>
+            <span class="status ok"><i></i>正常（模拟）</span>
+          </div>
+          <div class="svc-rows">
+            <span class="k">连接数</span><span class="v num">12 / 100</span>
+            <span class="k">慢查询（1h）</span><span class="v num">0 条</span>
+            <span class="k">磁盘使用</span><span class="v num">41%</span>
+            <span class="k">最近检查</span><span class="v num" id="chk2">2026-09-30 10:02:15</span>
+          </div>
+        </div>
+
+        <div class="card svc-card off">
+          <div class="head">
+            <span class="cat-icon"><svg class="ic"><use href="#i-database"/></svg></span>
+            <div style="flex:1"><b>Redis</b><div class="meta">登录会话 / 缓存监测</div></div>
+            <span class="status off"><i></i>未接入</span>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-3);line-height:1.7">
+            本原型未接入 Redis 监测，不能据此判断生产环境的部署或运行情况。接入真实检查前保持「未接入」。
+          </div>
+        </div>
+
+        <div class="card svc-card off">
+          <div class="head">
+            <span class="cat-icon"><svg class="ic"><use href="#i-monitor"/></svg></span>
+            <div style="flex:1"><b>小程序端版本</b><div class="meta">微信「柴记账」小程序</div></div>
+            <span class="status unknown"><i></i>未知</span>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-3);line-height:1.7">
+            本原型未读取小程序线上发布记录，状态保持「未知」。实际版本及发布时间须以微信小程序后台的核验结果为准。
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">版本信息</div><span class="tag tag-orange">原型示例</span></div>
+        <div class="card-body">
+          <div class="svc-rows" style="grid-template-columns: 200px 1fr; gap:12px 16px">
+            <span class="k">管理后台</span><span class="v num">v0.1.0（高保真原型）</span>
+            <span class="k">后端服务 chai-api</span><span class="v">未知 · 待核验</span>
+            <span class="k">小程序线上版本</span><span class="v">未知 · 待核验</span>
+            <span class="k">更新日志</span><span class="v"><span class="tag tag-dashed">待接入</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="banner banner-info" style="margin-top:16px">
+        <svg class="ic"><use href="#i-shield"/></svg>
+        <div>状态口径：<b>正常</b> = 探针检查通过；<b>异常</b> = 检查失败需处理；<b>未接入</b> = 尚未建设监测；<b>未知</b> = 无法自动探测。本页为只读页面，如需重启服务或变更配置，请通过内部运维流程处理。</div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+$('#btnRefresh').addEventListener('click', function () {
+  var btn = this;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="border-color:rgba(0,122,255,.25);border-top-color:var(--primary)"></span>检查中…';
+  setTimeout(function () {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="ic"><use href="#i-refresh"/></svg>模拟检查';
+    var t = '2026-09-30 10:02:15（示例）';
+    $('#chk1').textContent = t; $('#chk2').textContent = t;
+    toast('模拟检查完成，未连接真实服务；生产状态仍须另行核验', 'ok');
+  }, 800);
+});
+</script>
+</body>
+</html>

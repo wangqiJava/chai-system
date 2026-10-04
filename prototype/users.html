@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用户管理 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .drawer .user-head { display: flex; align-items: center; gap: 12px; }
+  .drawer .user-head .name { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .mask-note { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); background: var(--fill-1); border-radius: 6px; padding: 6px 10px; margin-top: 10px; }
+  .recent-rec { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px dashed var(--border-light); font-size: 12.5px; }
+  .recent-rec:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item active" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>用户管理</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">用户管理</h1>
+          <p class="page-desc">查询用户基本信息、关联账本与使用概况。个人财务明细仅限授权查看。</p>
+        </div>
+      </div>
+
+      <!-- 筛选区 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="filter-bar">
+          <div class="field">
+            <label class="field-label">用户 ID</label>
+            <input class="input w-sm num" id="fUid" placeholder="如 U10231">
+          </div>
+          <div class="field">
+            <label class="field-label">昵称</label>
+            <div class="input-icon">
+              <svg class="ic"><use href="#i-search"/></svg>
+              <input class="input w-md" id="fName" placeholder="搜索昵称关键词">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">注册时间</label>
+            <div class="range">
+              <input class="input" type="date" id="fFrom" value="">
+              <span class="sep">至</span>
+              <input class="input" type="date" id="fTo" value="">
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" id="btnQuery"><svg class="ic"><use href="#i-search"/></svg>查询</button>
+            <button class="btn" id="btnReset">重置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 列表 -->
+      <div class="card table-card">
+        <div class="table-toolbar">
+          <span class="note" id="resultNote">共 8 位用户 · 演示数据子集</span>
+          <span class="filter-chip" id="activeFilter" style="display:none">
+            <svg class="ic"><use href="#i-filter"/></svg><span id="activeFilterText"></span>
+            <svg class="ic" id="clearFilter" style="cursor:pointer"><use href="#i-close"/></svg>
+          </span>
+          <div style="margin-left:auto"></div>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>用户 ID</th>
+                <th>头像 / 昵称</th>
+                <th>注册时间</th>
+                <th class="num-h">账本数</th>
+                <th class="num-h">记账笔数</th>
+                <th class="op-cell">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="emptyHolder"></div>
+        <div class="pager">
+          <span class="total">共 <span id="totalCount">8</span> 条 · 每页 10 条 · 演示数据仅一页</span>
+          <div class="pages">
+            <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-l"/></svg></button>
+            <button class="page-btn on">1</button>
+            <button class="page-btn" disabled><svg class="ic ic-sm"><use href="#i-chev-r"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 用户详情抽屉 -->
+<div class="mask" id="drawerUser"></div>
+<aside class="drawer" id="drawerUserBody" aria-label="用户详情">
+  <div class="drawer-head">
+    <div class="user-head" id="drawerHead"></div>
+    <button class="icon-btn" onclick="closeLayer('drawerUser');closeLayer('drawerUserBody')" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="drawer-body" id="drawerContent"></div>
+  <div class="drawer-foot">
+    <a class="btn" id="drawerRecordsLink" href="data.html"><svg class="ic"><use href="#i-book"/></svg>查看该用户记账记录</a>
+  </div>
+</aside>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ---------- 演示数据（虚构，与业务数据查询页保持一致） ---------- */
+var USERS = [
+  { uid: 'U10231', name: '晓婷爱存钱', reg: '2026-03-12 10:24', last: '2026-09-29 21:47', ledgerCount: 3, recCount: 512,
+    openId: 'o7Xk3****9f2A', status: '正常',
+    ledgers: [
+      { id: 'L50021', name: '日常开销', def: true, count: 386, created: '2026-03-12' },
+      { id: 'L50022', name: '旅行基金', def: false, count: 46, created: '2026-04-20' },
+      { id: 'L50023', name: '装修存款', def: false, count: 80, created: '2026-06-05' }
+    ],
+    budgets: [
+      { ledger: '日常开销', month: '2026-09', type: '总预算', amount: '3,000.00', cats: '含分类预算 2 项（餐饮 / 交通）' },
+      { ledger: '日常开销', month: '2026-10', type: '总预算', amount: '3,000.00', cats: '含分类预算 2 项（餐饮 / 交通）' }
+    ],
+    recent: [
+      { date: '2026-09-29', type: '支出', cat: '餐饮', amount: '-38.00' },
+      { date: '2026-09-28', type: '支出', cat: '交通', amount: '-128.50' },
+      { date: '2026-09-27', type: '收入', cat: '理财', amount: '+12.36' }
+    ] },
+  { uid: 'U10232', name: '思远的账本', reg: '2026-04-02 15:10', last: '2026-09-30 08:12', ledgerCount: 2, recCount: 252,
+    openId: 'oQ8m2****c4De', status: '正常',
+    ledgers: [
+      { id: 'L50031', name: '日常开销', def: true, count: 214, created: '2026-04-02' },
+      { id: 'L50032', name: '报销暂存', def: false, count: 38, created: '2026-05-11' }
+    ],
+    budgets: [ { ledger: '日常开销', month: '2026-09', type: '总预算', amount: '2,500.00', cats: '未设置分类预算' } ],
+    recent: [ { date: '2026-09-30', type: '支出', cat: '餐饮', amount: '-25.00' }, { date: '2026-09-29', type: '支出', cat: '购物', amount: '-299.00' } ] },
+  { uid: 'U10233', name: '小林不剁手', reg: '2026-05-18 09:32', last: '2026-09-30 08:40', ledgerCount: 1, recCount: 96,
+    openId: 'oP3nW****7bKq', status: '正常',
+    ledgers: [ { id: 'L50041', name: '日常开销', def: true, count: 96, created: '2026-05-18' } ],
+    budgets: [], recent: [ { date: '2026-09-30', type: '支出', cat: '餐饮', amount: '-16.00' } ] },
+  { uid: 'U10244', name: '墨墨记账', reg: '2026-06-30 20:05', last: '2026-09-26 22:18', ledgerCount: 2, recCount: 202,
+    openId: 'oL5vT****h2Rm', status: '正常',
+    ledgers: [
+      { id: 'L50052', name: '日常开销', def: true, count: 173, created: '2026-06-30' },
+      { id: 'L50053', name: '宝宝基金', def: false, count: 29, created: '2026-07-15' }
+    ],
+    budgets: [ { ledger: '宝宝基金', month: '2026-09', type: '总预算', amount: '2,000.00', cats: '未设置分类预算' }, { ledger: '宝宝基金', month: '2026-10', type: '总预算', amount: '2,000.00', cats: '未设置分类预算' } ],
+    recent: [ { date: '2026-09-26', type: '支出', cat: '教育', amount: '-1,580.00' }, { date: '2026-09-25', type: '支出', cat: '人情', amount: '-600.00' } ] },
+  { uid: 'U10251', name: '晴天的钱包', reg: '2026-08-09 11:47', last: '2026-09-29 19:22', ledgerCount: 1, recCount: 41,
+    openId: 'oH9bF****k8Xz', status: '正常',
+    ledgers: [ { id: 'L50061', name: '日常开销', def: true, count: 41, created: '2026-08-09' } ],
+    budgets: [], recent: [ { date: '2026-09-29', type: '支出', cat: '交通', amount: '-6.00' } ] },
+  { uid: 'U10258', name: '翔哥省钱记', reg: '2026-08-21 08:15', last: '2026-09-28 09:30', ledgerCount: 1, recCount: 128,
+    openId: 'oD2cJ****m5Np', status: '正常',
+    ledgers: [ { id: 'L50071', name: '日常开销', def: true, count: 128, created: '2026-08-21' } ],
+    budgets: [], recent: [ { date: '2026-09-28', type: '收入', cat: '工资', amount: '+8,650.00' } ] },
+  { uid: 'U10266', name: '琪琪的小金库', reg: '2026-09-14 22:30', last: '2026-09-29 21:05', ledgerCount: 1, recCount: 15,
+    openId: 'oA6gX****t3Vy', status: '正常',
+    ledgers: [ { id: 'L50081', name: '日常开销', def: true, count: 15, created: '2026-09-14' } ],
+    budgets: [], recent: [ { date: '2026-09-29', type: '支出', cat: '餐饮', amount: '-22.00' } ] },
+  { uid: 'U10271', name: '楠得糊涂', reg: '2026-09-29 19:03', last: '2026-09-30 07:58', ledgerCount: 1, recCount: 2,
+    openId: 'oE4sQ****w9Lu', status: '正常',
+    ledgers: [ { id: 'L50091', name: '日常开销', def: true, count: 2, created: '2026-09-29' } ],
+    budgets: [], recent: [ { date: '2026-09-30', type: '支出', cat: '餐饮', amount: '-9.50' } ] }
+];
+
+/* ---------- 渲染 ---------- */
+var filtered = USERS.slice();
+var applied = null; // 已生效筛选描述
+
+function renderRows(state) {
+  var tbody = $('#tbody');
+  if (state === 'loading') { tbody.innerHTML = skeletonRows(6); $('#emptyHolder').innerHTML = ''; return; }
+  var rows = filtered.map(function (u) {
+    return '<tr>' +
+      '<td><a class="link num" href="javascript:void(0)" onclick="openUser(\'' + u.uid + '\')">' + u.uid + '</a></td>' +
+      '<td><div class="user-cell">' + avatarHTML(u.name, u.uid) + '<span>' + u.name + '</span></div></td>' +
+      '<td class="num">' + u.reg + '</td>' +
+      '<td class="num-cell num">' + u.ledgerCount + '</td>' +
+      '<td class="num-cell num">' + fmtNum(u.recCount) + '</td>' +
+      '<td class="op-cell"><span class="ops"><button class="btn btn-text btn-sm" onclick="openUser(\'' + u.uid + '\')">查看详情</button></span></td>' +
+      '</tr>';
+  }).join('');
+  tbody.innerHTML = rows;
+  $('#totalCount').textContent = filtered.length;
+  var note = '共 ' + filtered.length + ' 位用户 · 演示数据子集';
+  if (applied) note += ' · 已应用筛选';
+  $('#resultNote').textContent = note;
+  $('#emptyHolder').innerHTML = filtered.length ? '' : stateBlockHTML('noresult', { btnFn: 'resetFilter()' });
+  var chip = $('#activeFilter');
+  if (applied) { chip.style.display = ''; $('#activeFilterText').textContent = applied; } else { chip.style.display = 'none'; }
+}
+
+function applyFilter() {
+  var uid = $('#fUid').value.trim().toLowerCase();
+  var name = $('#fName').value.trim();
+  var from = $('#fFrom').value, to = $('#fTo').value;
+  var conds = [];
+  filtered = USERS.filter(function (u) {
+    if (uid && u.uid.toLowerCase().indexOf(uid) < 0) return false;
+    if (name && u.name.indexOf(name) < 0) return false;
+    var d = u.reg.slice(0, 10);
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
+  if (uid) conds.push('用户ID 含「' + uid + '」');
+  if (name) conds.push('昵称含「' + name + '」');
+  if (from || to) conds.push('注册时间 ' + (from || '…') + ' 至 ' + (to || '…'));
+  applied = conds.length ? conds.join('；') : null;
+}
+
+$('#btnQuery').addEventListener('click', function () {
+  applyFilter();
+  simulateQuery(renderRows);
+});
+function resetFilter() {
+  $('#fUid').value = ''; $('#fName').value = ''; $('#fFrom').value = ''; $('#fTo').value = '';
+  applied = null; filtered = USERS.slice();
+  simulateQuery(renderRows);
+}
+$('#btnReset').addEventListener('click', resetFilter);
+$('#clearFilter').addEventListener('click', resetFilter);
+$('#fName').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('#btnQuery').click(); });
+
+/* ---------- 详情抽屉 ---------- */
+window.openUser = function (uid) {
+  var u = USERS.filter(function (x) { return x.uid === uid; })[0];
+  if (!u) return;
+  $('#drawerHead').innerHTML =
+    avatarHTML(u.name, u.uid, 'avatar-lg') +
+    '<div><div class="name">' + u.name + '<span class="tag tag-green">' + u.status + '</span></div>' +
+    '<div class="text-3" style="font-size:12.5px;margin-top:2px"><span class="num">' + u.uid + '</span> · 注册于 ' + u.reg + '</div></div>';
+  var ledgersHtml = u.ledgers.map(function (l) {
+    return '<div class="ledger-row">' +
+      '<div class="info"><div class="name">' + l.name + (l.def ? '<span class="tag tag-blue">默认</span>' : '') + '</div>' +
+      '<div class="meta"><span class="num">' + l.id + '</span> · ' + l.count + ' 条记录 · 创建于 ' + l.created + '</div></div>' +
+      '<a class="link" style="font-size:12.5px" href="data.html?tab=records&ledger=' + l.id + '&user=' + u.uid + '">查看记录</a>' +
+      '</div>';
+  }).join('');
+  var budgetsHtml = u.budgets.length
+    ? u.budgets.map(function (b) {
+        return '<div class="ledger-row"><div class="info"><div class="name">' + b.ledger + ' · ' + b.month +
+          '<span class="tag tag-gray" style="margin-left:2px">' + b.type + '</span></div>' +
+          '<div class="meta">' + b.cats + '</div></div><span class="amt masked" aria-label="预算金额已隐藏">•••••</span>' +
+          '<a class="link" href="data.html?tab=budgets&user=' + u.uid + '&month=' + b.month + '">查看预算</a></div>';
+      }).join('')
+    : '<div class="text-3" style="font-size:12.5px;padding:4px 0 8px">该用户暂未设置预算。</div>';
+  var recentHtml = u.recent.map(function (r) {
+    return '<div class="recent-rec"><span class="num text-3" style="width:74px">' + r.date + '</span>' +
+      '<span class="tag ' + (r.type === '支出' ? 'tag-red' : 'tag-green') + '">' + (r.type === '支出' ? '支出' : '收入') + '</span>' +
+      '<span style="flex:1">' + r.cat + '</span>' +
+      '<span class="amt masked">•••••</span></div>';
+  }).join('');
+
+  $('#drawerContent').innerHTML =
+    '<div class="d-section"><div class="d-section-title">基本资料</div>' +
+    '<dl class="desc-list">' +
+    '<dt>用户 ID</dt><dd class="num">' + u.uid + '</dd>' +
+    '<dt>昵称</dt><dd>' + u.name + '</dd>' +
+    '<dt>注册时间</dt><dd class="num">' + u.reg + '</dd>' +
+    '<dt>最近记账</dt><dd class="num">' + u.last + '</dd>' +
+    '<dt>OpenID</dt><dd><span class="num">' + u.openId + '</span> <button class="icon-btn sm" title="OpenID 默认脱敏，复制需授权（演示）" onclick="toast(\'OpenID 复制需单独授权并留痕（演示）\',\'warn\')"><svg class="ic"><use href="#i-copy"/></svg></button></dd>' +
+    '<dt>账号状态</dt><dd><span class="tag tag-green">' + u.status + '</span></dd>' +
+    '</dl>' +
+    '<div class="mask-note"><svg class="ic ic-sm"><use href="#i-eyeoff"/></svg>遵循最小必要原则：此处不展示手机号、UnionID 等未接入字段；OpenID 默认脱敏。</div>' +
+    '</div>' +
+    '<div class="d-section"><div class="d-section-title">数据概况</div>' +
+    '<div class="mini-stats">' +
+    '<div class="mini-stat"><b>' + u.ledgerCount + '</b><span>账本数</span></div>' +
+    '<div class="mini-stat"><b>' + fmtNum(u.recCount) + '</b><span>记账笔数</span></div>' +
+    '<div class="mini-stat"><b>' + u.budgets.length + '</b><span>预算设置数</span></div>' +
+    '</div></div>' +
+    '<div class="d-section"><div class="d-section-title">关联账本</div>' + ledgersHtml + '</div>' +
+    '<div class="d-section"><div class="d-section-title">预算设置概况</div>' + budgetsHtml +
+    '<div class="text-3" style="font-size:12px;margin-top:2px">预算金额默认隐藏，点击「查看预算」后可按条授权查看。</div></div>' +
+    '<div class="d-section"><div class="d-section-title">最近记账</div>' + recentHtml +
+    '<div class="text-3" style="font-size:12px;margin-top:8px">金额默认遮蔽，完整明细需在「记账记录」页签中授权查看。</div></div>';
+
+  $('#drawerRecordsLink').href = 'data.html?tab=records&user=' + u.uid;
+  openLayer('drawerUser'); openLayer('drawerUserBody');
+};
+$('#drawerUser').addEventListener('click', function () { closeLayer('drawerUser'); closeLayer('drawerUserBody'); });
+
+/* 初始渲染 + URL 预设 */
+renderRows('done');
+(function () {
+  var q = queryOf();
+  if (q.get('uid')) {
+    var u = USERS.filter(function (x) { return x.uid === q.get('uid'); })[0];
+    if (u) setTimeout(function () { openUser(u.uid); }, 150);
+  }
+})();
+</script>
+</body>
+</html>

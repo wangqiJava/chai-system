@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设计规范与边界 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .spec-sec { margin-bottom: 28px; scroll-margin-top: 76px; }
+  .spec-sec > h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .spec-sec > .sub { font-size: 12.5px; color: var(--text-3); margin-bottom: 14px; }
+  .tree { font-size: 13.5px; line-height: 2; }
+  .tree .lv1 { font-weight: 500; }
+  .tree .lv2 { padding-left: 22px; color: var(--text-2); position: relative; }
+  .tree .lv3 { padding-left: 44px; color: var(--text-3); font-size: 12.5px; }
+  .jump-map { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12.5px; }
+  .jump-item { border: 1px solid var(--border-light); border-radius: 8px; padding: 8px 12px; background: var(--surface); }
+  .jump-item b { color: var(--primary); font-weight: 500; }
+  .type-scale td:first-child { width: 220px; }
+  .state-demo-bar { display: flex; gap: 8px; margin-bottom: 0; }
+  .mini-tbl-wrap { border: 1px solid var(--border-light); border-radius: 0 0 12px 12px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">柴</span>
+      <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-group">总览</div>
+      <a class="nav-item" href="index.html"><svg class="ic"><use href="#i-overview"/></svg><span>数据概览</span></a>
+      <div class="nav-group">业务管理</div>
+      <a class="nav-item" href="users.html"><svg class="ic"><use href="#i-user"/></svg><span>用户管理</span></a>
+      <a class="nav-item" href="data.html"><svg class="ic"><use href="#i-book"/></svg><span>业务数据查询</span></a>
+      <a class="nav-item" href="categories.html"><svg class="ic"><use href="#i-tag"/></svg><span>分类管理</span></a>
+      <div class="nav-group">运维支持</div>
+      <a class="nav-item" href="logs.html"><svg class="ic"><use href="#i-log"/></svg><span>操作日志</span><span class="nav-tag">拟建设</span></a>
+      <a class="nav-item" href="system.html"><svg class="ic"><use href="#i-server"/></svg><span>系统状态</span></a>
+      <a class="nav-item" href="feedback.html"><svg class="ic"><use href="#i-msg"/></svg><span>用户反馈</span></a>
+      <div class="nav-group">原型说明</div>
+      <a class="nav-item active" href="spec.html"><svg class="ic"><use href="#i-spec"/></svg><span>设计规范与边界</span></a>
+    </nav>
+    <div class="side-foot">v0.1.0 · 演示原型</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCollapse" aria-label="折叠菜单"><svg class="ic"><use href="#i-collapse"/></svg></button>
+      <div class="breadcrumb">首页 <svg class="ic"><use href="#i-chev-r"/></svg> <b>设计规范与边界</b></div>
+      <div class="top-right">
+        <span class="env-tag">演示环境</span>
+        <span class="top-divider"></span>
+        <div class="admin-chip" id="adminChip">
+          <span class="avatar avatar-sm" style="background:var(--primary)">明</span>
+          <span class="name">张明</span><span class="role">超级管理员</span>
+          <svg class="ic"><use href="#i-chev-d"/></svg>
+          <div class="dropdown">
+            <div class="dropdown-item"><svg class="ic ic-sm"><use href="#i-shield"/></svg>账号：admin</div>
+            <a class="dropdown-item danger" href="login.html?expired=1"><svg class="ic ic-sm"><use href="#i-logout"/></svg>退出登录</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">设计规范与边界</h1>
+          <p class="page-desc">本页是原型的规范说明：导航结构、设计令牌、组件与状态、关键跳转，以及「已有业务 / 拟新增管理能力」的边界区分，用于指导后续开发。</p>
+        </div>
+      </div>
+
+      <div class="spec-toc">
+        <a href="#s1">1 导航结构</a><a href="#s2">2 颜色</a><a href="#s3">3 字号与字体</a>
+        <a href="#s4">4 间距 / 圆角 / 阴影</a><a href="#s5">5 组件规范</a><a href="#s6">6 表格六态</a>
+        <a href="#s7">7 关键跳转与弹层</a><a href="#s8">8 能力边界</a><a href="#s9">9 安全与合规说明</a>
+      </div>
+
+      <!-- 1 导航结构 -->
+      <div class="card spec-sec" id="s1">
+        <div class="card-head"><div class="card-title">1 · 导航结构</div><div class="card-sub">左侧 220px 可折叠（折叠后 64px 仅图标），顶栏含面包屑 / 演示环境标识 / 管理员身份与退出</div></div>
+        <div class="card-body tree">
+          <div class="lv1">登录页 login.html（仅管理员，无公开注册）</div>
+          <div class="lv1">主框架（侧边栏 + 顶栏 + 内容区）</div>
+          <div class="lv2">总览</div>
+          <div class="lv3">数据概览 index.html — 指标卡 / 7·30 天趋势 / 服务摘要 / 最近操作</div>
+          <div class="lv2">业务管理</div>
+          <div class="lv3">用户管理 users.html — 列表 → 用户详情抽屉</div>
+          <div class="lv3">业务数据查询 data.html — 页签：账本 / 记账记录（授权查看）/ 预算</div>
+          <div class="lv3">分类管理 categories.html — 页签：系统预置分类（可维护）/ 用户自定义分类（只读）</div>
+          <div class="lv2">运维支持</div>
+          <div class="lv3">操作日志 logs.html（拟建设）— 列表 → 详情抽屉</div>
+          <div class="lv3">系统状态 system.html — 只读状态卡 + 版本信息</div>
+          <div class="lv3">用户反馈 feedback.html — 前往微信小程序后台的指引，不做反馈列表</div>
+          <div class="lv2">原型说明</div>
+          <div class="lv3">设计规范与边界 spec.html（本页，开发前阅读）</div>
+        </div>
+      </div>
+
+      <!-- 2 颜色 -->
+      <div class="card spec-sec" id="s2">
+        <div class="card-head"><div class="card-title">2 · 颜色</div><div class="card-sub">延续小程序蓝白视觉；支出红 / 收入绿同时以文字与正负号区分，不仅依赖颜色</div></div>
+        <div class="card-body">
+          <div class="swatch-grid">
+            <div class="swatch"><div class="chip" style="background:#007AFF"></div><div class="info"><b>主色 Primary</b><span>#007AFF</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#0062CC"></div><div class="info"><b>主色按下</b><span>#0062CC</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#E8F1FF"></div><div class="info"><b>主色浅底（选中态）</b><span>#E8F1FF</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#F2F2F7"></div><div class="info"><b>页面背景</b><span>#F2F2F7</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#FFFFFF;border-bottom:1px solid #F2F3F5"></div><div class="info"><b>卡片 / 表格</b><span>#FFFFFF</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#1D2129"></div><div class="info"><b>标题正文</b><span>#1D2129</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#4E5969"></div><div class="info"><b>次级文字</b><span>#4E5969</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#687586"></div><div class="info"><b>辅助文字</b><span>#687586</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#E5E6EB"></div><div class="info"><b>边框</b><span>#E5E6EB</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#F53F3F"></div><div class="info"><b>支出 / 危险</b><span>#F53F3F</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#00B42A"></div><div class="info"><b>收入 / 成功</b><span>#00B42A</span></div></div>
+            <div class="swatch"><div class="chip" style="background:#FF7D00"></div><div class="info"><b>警示 / 拟建设</b><span>#FF7D00</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 字号 -->
+      <div class="card spec-sec" id="s3">
+        <div class="card-head"><div class="card-title">3 · 字号与字体</div><div class="card-sub">中文苹方 / 微软雅黑；数字使用等宽字体（ID、金额、时间）并开启 tabular-nums，保证列对齐</div></div>
+        <div class="card-body table-wrap">
+          <table class="tbl spec-table">
+            <thead><tr><th>层级</th><th>字号 / 字重</th><th>用途</th><th>示例</th></tr></thead>
+            <tbody>
+              <tr><td>页面标题</td><td class="num">20 / 600</td><td>各页 page-title</td><td style="font-size:20px;font-weight:600">用户管理</td></tr>
+              <tr><td>卡片标题</td><td class="num">15 / 600</td><td>card-title、抽屉标题</td><td style="font-size:15px;font-weight:600">使用趋势</td></tr>
+              <tr><td>指标数值</td><td class="num">28 / 600 等宽</td><td>概览指标卡</td><td class="num" style="font-size:28px;font-weight:600">12,847</td></tr>
+              <tr><td>正文 / 表格</td><td class="num">14 常规</td><td>表格内容、表单</td><td style="font-size:14px">晓婷爱存钱</td></tr>
+              <tr><td>辅助说明</td><td class="num">12.5–13 / 400 灰</td><td>page-desc、卡片副标题</td><td class="text-3" style="font-size:12.5px">演示数据子集</td></tr>
+              <tr><td>标签 / 角标</td><td class="num">12 / 400</td><td>tag、nav-tag</td><td><span class="tag tag-red"><i class="dot"></i>支出</span></td></tr>
+              <tr><td>金额</td><td class="num">13 等宽</td><td>收支金额，两位小数右对齐</td><td><span class="amt exp">-38.00</span>　<span class="amt inc">+8,650.00</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4 间距 -->
+      <div class="card spec-sec" id="s4">
+        <div class="card-head"><div class="card-title">4 · 间距 / 圆角 / 阴影</div></div>
+        <div class="card-body" style="font-size:13px;line-height:2">
+          <b>间距</b>：以 4px 为栅格。内容区 padding 24（1280 下 20）；卡片间距 16；卡片内边距 20；表头/单元格上下 9–11；筛选控件间距 16。<br>
+          <b>圆角</b>：卡片 12px；按钮 / 输入框 / 抽屉弹窗内控件 8px；标签 4px；头像圆形。<br>
+          <b>阴影</b>：常驻 <span class="num">0 1px 2px rgba(29,33,41,.04)</span>；悬浮层 <span class="num">0 8px 28px rgba(29,33,41,.14)</span>。克制使用，不使用大面积渐变、玻璃拟态与炫光。
+        </div>
+      </div>
+
+      <!-- 5 组件 -->
+      <div class="card spec-sec" id="s5">
+        <div class="card-head"><div class="card-title">5 · 组件规范</div><div class="card-sub">按钮高度 32（弹窗大按钮 40 / 小按钮 28）；查询 / 重置固定在筛选区最右；表格操作列 sticky 固定右侧</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:18px">
+          <div>
+            <div class="field-label" style="margin-bottom:8px">按钮</div>
+            <div class="demo-row">
+              <button class="btn btn-primary">主按钮</button>
+              <button class="btn">次按钮</button>
+              <button class="btn btn-danger">危险操作</button>
+              <button class="btn btn-text">文字按钮</button>
+              <button class="btn btn-primary" disabled>禁用</button>
+              <button class="btn btn-primary is-loading"><span class="spin"></span>加载中</button>
+            </div>
+          </div>
+          <div>
+            <div class="field-label" style="margin-bottom:8px">输入与选择</div>
+            <div class="demo-row">
+              <input class="input w-sm" placeholder="请输入">
+              <input class="input w-sm err" value="错误态">
+              <select class="select w-sm"><option>下拉选择</option></select>
+              <div class="input-icon"><svg class="ic"><use href="#i-search"/></svg><input class="input w-sm" placeholder="搜索"></div>
+            </div>
+          </div>
+          <div>
+            <div class="field-label" style="margin-bottom:8px">标签与状态</div>
+            <div class="demo-row">
+              <span class="tag tag-red"><i class="dot"></i>支出</span>
+              <span class="tag tag-green"><i class="dot"></i>收入</span>
+              <span class="tag tag-blue">默认账本</span>
+              <span class="tag tag-gray">停用</span>
+              <span class="tag tag-outline">拟建设</span>
+              <span class="tag tag-dashed">待接入</span>
+              <span class="status ok"><i></i>正常</span>
+              <span class="status err"><i></i>异常</span>
+              <span class="status off"><i></i>未接入</span>
+              <span class="status unknown"><i></i>未知</span>
+            </div>
+          </div>
+          <div>
+            <div class="field-label" style="margin-bottom:8px">弹层与反馈（点击体验）</div>
+            <div class="demo-row">
+              <button class="btn" data-open="demoModal">弹窗（简单编辑 / 确认）</button>
+              <button class="btn" data-open="demoDrawer">抽屉（多字段查看）</button>
+              <button class="btn" onclick="toast('已保存分类「餐饮」（演示环境不落库）','ok')">成功 Toast</button>
+              <button class="btn" onclick="toast('请先选择查看用途','warn')">警示 Toast</button>
+              <button class="btn" onclick="toast('接口请求失败，请稍后重试','err')">失败 Toast</button>
+            </div>
+            <div class="text-3" style="font-size:12.5px;margin-top:10px">规则：简单编辑用弹窗；多字段查看用右侧抽屉（500px）；有风险的操作必须二次确认并说明影响范围（见分类停用、授权查看）。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 表格六态 -->
+      <div class="card spec-sec" id="s6">
+        <div class="card-head"><div class="card-title">6 · 表格六态</div><div class="card-sub">所有业务列表页共用：查询后骨架屏 → 结果；无匹配给「清空筛选」出口；未接入数据不伪装</div></div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="seg" id="stateSeg" style="margin-bottom:14px">
+            <button class="seg-btn active" data-state="data">有数据</button>
+            <button class="seg-btn" data-state="loading">加载中</button>
+            <button class="seg-btn" data-state="noresult">筛选无结果</button>
+            <button class="seg-btn" data-state="empty">初始空数据</button>
+            <button class="seg-btn" data-state="error">接口失败</button>
+            <button class="seg-btn" data-state="noauth">无权限</button>
+          </div>
+        </div>
+        <div class="mini-tbl-wrap">
+          <table class="tbl"><thead><tr><th>用户 ID</th><th>昵称</th><th class="num-h">记账笔数</th></tr></thead>
+          <tbody id="stateBody"></tbody></table>
+          <div id="stateHolder"></div>
+        </div>
+      </div>
+
+      <!-- 7 跳转 -->
+      <div class="card spec-sec" id="s7">
+        <div class="card-head"><div class="card-title">7 · 关键跳转与弹层</div><div class="card-sub">页面间保留来路：从用户到数据可层层下钻，敏感明细必须经授权弹窗</div></div>
+        <div class="card-body jump-map">
+          <div class="jump-item">登录 → <b>数据概览</b></div>
+          <div class="jump-item">概览·服务摘要 → <b>系统状态</b></div>
+          <div class="jump-item">概览·最近操作 → <b>操作日志</b></div>
+          <div class="jump-item">用户列表 · 查看详情 → <b>用户详情抽屉</b></div>
+          <div class="jump-item">用户抽屉 · 账本「查看记录」 → <b>记账记录页签（自动带入用户+账本筛选）</b></div>
+          <div class="jump-item">账本页签 · 查看记录 → <b>记账记录页签（带入账本筛选）</b></div>
+          <div class="jump-item">记录/账本/预算 · 所属用户 → <b>用户详情抽屉（users.html?uid=）</b></div>
+          <div class="jump-item">记账记录 / 预算 · 授权查看 → <b>授权确认弹窗（用途必填，“其他”须说明）→ 单条显示 → 重新隐藏</b></div>
+          <div class="jump-item">用户详情 · 查看预算 → <b>预算页签（自动带入用户 + 月份）</b></div>
+          <div class="jump-item">系统预置分类 · 停用 → <b>风险确认弹窗（引用数 + 影响范围）</b></div>
+          <div class="jump-item">日志 · 查看详情 → <b>操作详情抽屉（含请求标识）</b></div>
+          <div class="jump-item">反馈页 → <b>微信公众平台（新窗口）</b></div>
+        </div>
+      </div>
+
+      <!-- 8 能力边界 -->
+      <div class="card spec-sec" id="s8">
+        <div class="card-head"><div class="card-title">8 · 能力边界：已有业务 vs 管理端新增</div><div class="card-sub">小程序已有业务能力 ≠ 管理接口已实现；未建设的一律明确标注，不伪装成已上线</div></div>
+        <div class="card-body table-wrap">
+          <table class="tbl spec-table">
+            <thead><tr><th style="width:200px">能力</th><th style="width:110px">状态</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>微信登录、昵称头像</td><td><span class="tag tag-green">小程序已有</span></td><td>管理端仅展示注册时间、昵称等概况；OpenID 默认脱敏。</td></tr>
+              <tr><td>收入 / 支出记录</td><td><span class="tag tag-green">小程序已有</span></td><td>管理端拟新增只读查询与授权查看；原型仅演示遮蔽，真实权限及审计尚未实现。</td></tr>
+              <tr><td>多账本、自定义分类</td><td><span class="tag tag-green">小程序已有</span></td><td>账本可查询并下钻记录；自定义分类只读。</td></tr>
+              <tr><td>统计、月度预算</td><td><span class="tag tag-green">小程序已有</span></td><td>管理端只读查询，所有预算入口默认遮蔽金额，按条授权显示，不重算统计。</td></tr>
+              <tr><td>用户 / 账本 / 记录 / 预算查询接口</td><td><span class="tag tag-outline">拟新增</span></td><td>本原型定义了字段与筛选，接口待开发。</td></tr>
+              <tr><td>系统预置分类维护</td><td><span class="tag tag-outline">拟新增</span></td><td>新增 / 编辑 / 排序 / 启停，停用不删除历史。</td></tr>
+              <tr><td>操作日志</td><td><span class="tag tag-orange">拟建设</span></td><td>采集登录、查询、敏感查看、分类维护；接口未接入。</td></tr>
+              <tr><td>系统状态监测</td><td><span class="tag tag-orange">拟建设</span></td><td>后端 / 数据库探针待接；Redis 未接入则显示未接入。</td></tr>
+              <tr><td>批量导出个人信息</td><td><span class="tag tag-gray">明确不做</span></td><td>第一版不提供，后续如有合规需求需单独评审。</td></tr>
+              <tr><td>改写用户账单 / 一键删除用户数据</td><td><span class="tag tag-gray">明确不做</span></td><td>管理端只读排查，避免误操作用户财务数据。</td></tr>
+              <tr><td>反馈列表 / 工单 / 在线客服</td><td><span class="tag tag-gray">明确不做</span></td><td>使用微信原生反馈能力，仅提供后台指引。</td></tr>
+              <tr><td>订单 / 商品 / 支付 / 提现 / 营销</td><td><span class="tag tag-gray">明确不做</span></td><td>与记账小程序业务无关，不设计。</td></tr>
+              <tr><td>重启服务器 / 执行 SQL / 改生产配置</td><td><span class="tag tag-gray">明确不做</span></td><td>系统状态为只读页，高危操作走内部运维流程。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 9 安全 -->
+      <div class="card spec-sec" id="s9" style="margin-bottom:0">
+        <div class="card-head"><div class="card-title">9 · 安全与合规说明</div></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+          <div class="banner banner-danger">
+            <svg class="ic"><use href="#i-shield"/></svg>
+            <div><b>管理员权限必须由服务端鉴权：</b>前端隐藏菜单 / 按钮不构成访问控制，所有管理接口需在服务端校验管理员身份与权限，未授权请求应返回 403 并提示「无访问权限」。</div>
+          </div>
+          <div class="banner banner-warn">
+            <svg class="ic"><use href="#i-eyeoff"/></svg>
+            <div><b>敏感信息最小必要：</b>OpenID 默认脱敏；流水金额、备注和预算金额默认遮蔽。选定用途后仅显示一条，可重新隐藏；查询、切换页签或刷新后清除展示授权。正式服务端应在返回明文前完成鉴权和审计，原型的前端遮蔽不是安全措施。</div>
+          </div>
+          <div class="banner banner-info">
+            <svg class="ic"><use href="#i-info"/></svg>
+            <div><b>数据诚实：</b>未接入的指标与模块显示「待接入 / 拟建设」，不用占位数据伪装实时结果；不把用户收支金额汇总包装为平台营收。</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px" id="acceptance">
+        <div class="card-head"><div class="card-title">10 · 开发验收清单</div></div>
+        <div class="card-body">
+          <p>当前交付是静态交互原型，不是正式管理端。样例数据、登录和监测均为演示；正式前端工程、管理 API、鉴权与审计须分别开发和验收。</p>
+          <ul style="padding-left:20px;list-style:disc;margin-top:12px;line-height:2">
+            <li>桌面宽度 1280 / 1440 / 1920 下无整页横向溢出；折叠菜单具有名称提示。</li>
+            <li>用户详情进入记录或预算时，正确打开页签并带入用户、账本或月份条件。</li>
+            <li>授权用途必填，“其他”须填写说明；取消不显示数据；隐藏、切换、查询及刷新可清除显示状态。</li>
+            <li>弹窗和抽屉进入时获得焦点；Tab 在弹层内循环；Esc、取消或遮罩关闭后恢复焦点。</li>
+            <li>分类名称校验长度与同类型重复项，排序为 1–99 整数；编辑保存图标，停用必须确认。</li>
+            <li>登录缺项、错误和会话过期有清晰反馈；演示登录不提供真实访问控制。</li>
+            <li>列表覆盖加载、有数据、无匹配、空数据、失败重试和无权限；监测未知不冒充正常。</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 组件演示：弹窗 -->
+<div class="modal-wrap" id="demoModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="confirm-icon info"><svg class="ic"><use href="#i-edit"/></svg></div>
+      <div class="modal-title">弹窗（演示）</div>
+      <button class="icon-btn" data-close="demoModal" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="modal-body" style="font-size:13px;color:var(--text-2);line-height:1.8">
+      弹窗用于<b>简单编辑与风险确认</b>：新增 / 编辑分类、停用确认、授权查看确认。<br>
+      宽度 480px，标题 + 内容 + 右下角操作（取消为主按钮左侧）。危险操作按钮为红色或带影响范围说明。
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="demoModal">取消</button><button class="btn btn-primary" onclick="closeLayer('demoModal');toast('演示：已保存','ok')">确定</button></div>
+  </div>
+</div>
+
+<!-- 组件演示：抽屉 -->
+<div class="mask" id="demoDrawer"></div>
+<aside class="drawer" id="demoDrawerBody">
+  <div class="drawer-head">
+    <div class="drawer-title">抽屉（演示）</div>
+    <button class="icon-btn" onclick="closeLayer('demoDrawer');closeLayer('demoDrawerBody')" aria-label="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="drawer-body">
+    <div class="d-section"><div class="d-section-title">用途</div>
+    <p style="font-size:13px;color:var(--text-2);line-height:1.8">右侧抽屉宽 500px，用于<b>多字段查看</b>：用户详情、操作日志详情。从右侧滑入，遮罩点击 / ESC 可关闭。</p></div>
+    <div class="d-section"><div class="d-section-title">结构示例</div>
+    <dl class="desc-list"><dt>字段一</dt><dd>左侧标签固定 88px</dd><dt>字段二</dt><dd>右侧内容自动换行</dd></dl></div>
+  </div>
+</aside>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+$$('#stateSeg .seg-btn').forEach(function (b) {
+  b.addEventListener('click', function () {
+    $$('#stateSeg .seg-btn').forEach(function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    renderState(b.getAttribute('data-state'));
+  });
+});
+var DEMO_ROWS = [
+  ['U10231', '晓婷爱存钱', '512'],
+  ['U10232', '思远的账本', '252'],
+  ['U10233', '小林不剁手', '96']
+];
+function renderState(state) {
+  var body = $('#stateBody'), holder = $('#stateHolder');
+  holder.innerHTML = '';
+  if (state === 'data') {
+    body.innerHTML = DEMO_ROWS.map(function (r) {
+      return '<tr><td class="num">' + r[0] + '</td><td>' + r[1] + '</td><td class="num-cell num">' + r[2] + '</td></tr>';
+    }).join('');
+  } else if (state === 'loading') {
+    body.innerHTML = skeletonRows(3, 3);
+  } else {
+    body.innerHTML = '';
+    var map = {
+      noresult: 'noresult', empty: 'empty', error: 'error', noauth: 'noauth'
+    };
+    holder.innerHTML = stateBlockHTML(map[state], { btnFn: "document.querySelector('#stateSeg [data-state=data]').click()" });
+    if (state === 'noauth') {
+      var btn = holder.querySelector('.btn');
+      btn.textContent = '返回数据概览';
+      btn.setAttribute('onclick', "location.href='index.html'");
+    }
+  }
+}
+renderState('data');
+
+$('#demoDrawer').addEventListener('click', function () { closeLayer('demoDrawer'); closeLayer('demoDrawerBody'); });
+</script>
+</body>
+</html>

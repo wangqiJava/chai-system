@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>登录 — 柴记账 · 管理后台</title>
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-brand">
+    <span class="logo-mark">柴</span>
+    <b>柴记账</b>
+    <span>管理后台</span>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-title">管理员登录</div>
+    <div class="auth-sub">
+      <svg class="ic"><use href="#i-lock"/></svg>仅限管理员访问，不提供公开注册
+    </div>
+
+    <div id="authBanner" role="status" aria-live="polite"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="auth-field field">
+        <label class="field-label" for="fAccount">管理员账号</label>
+        <div class="input-icon">
+          <svg class="ic"><use href="#i-account"/></svg>
+          <input class="input btn-block" id="fAccount" style="height:38px;padding-left:32px" placeholder="请输入管理员账号" value="admin" autocomplete="username" required aria-describedby="accountError">
+        </div>
+        <p class="field-error" id="accountError" role="alert" hidden></p>
+      </div>
+      <div class="auth-field field">
+        <label class="field-label" for="fPassword">密码</label>
+        <div class="input-icon">
+          <svg class="ic" id="pwdIcon"><use href="#i-key"/></svg>
+          <input class="input btn-block" id="fPassword" style="height:38px;padding-left:32px;padding-right:40px" type="password" placeholder="请输入演示密码，勿填真实密码" autocomplete="off" required aria-describedby="passwordError">
+          <button type="button" class="icon-btn" id="pwdToggle" style="position:absolute;right:4px" aria-label="显示或隐藏密码">
+            <svg class="ic ic-sm"><use href="#i-eye"/></svg>
+          </button>
+        </div>
+        <p class="field-error" id="passwordError" role="alert" hidden></p>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" id="btnLogin" type="submit">登 录</button>
+    </form>
+
+    <div class="auth-demo-hint">
+      <svg class="ic ic-sm" style="color:var(--text-4)"><use href="#i-info"/></svg>
+      演示原型：账号 <span class="num">admin</span> · 密码 <span class="num">chai@2026</span>
+    </div>
+
+    <div class="auth-foot">
+      当前仅演示登录交互，请勿输入真实密码。<br>
+      正式管理员账号由服务端分配与鉴权，本原型不提供访问控制。
+    </div>
+  </div>
+
+  <div class="state-switcher">
+    原型状态预览：
+    <button class="sg-btn" data-state="default">默认</button>
+    <button class="sg-btn" data-state="loading">登录中</button>
+    <button class="sg-btn" data-state="fail">登录失败</button>
+    <button class="sg-btn" data-state="expired">会话过期</button>
+  </div>
+
+  <div class="auth-copy">柴记账 · 管理后台 v0.1.0 — 高保真原型，数据均为演示数据</div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  var form = $('#loginForm'), acc = $('#fAccount'), pwd = $('#fPassword'),
+      btn = $('#btnLogin'), banner = $('#authBanner');
+  var loginTimer = null, redirectTimer = null;
+  var banners = {
+    fail: '<div class="banner banner-danger auth-banner"><svg class="ic"><use href="#i-danger"/></svg><div><b>账号或密码错误</b>，请检查输入后重试。当前为演示提示，不代表生产锁定策略。</div></div>',
+    expired: '<div class="banner banner-warn auth-banner"><svg class="ic"><use href="#i-clock"/></svg><div><b>会话已过期</b>，请重新登录</div></div>'
+  };
+  function setBanner(html) { banner.innerHTML = html || ''; }
+  function clearErrors() {
+    [acc, pwd].forEach(function (field) { field.classList.remove('err'); field.removeAttribute('aria-invalid'); });
+    $('#accountError').hidden = true; $('#passwordError').hidden = true;
+  }
+  function inputError(field, id, message) {
+    field.classList.add('err'); field.setAttribute('aria-invalid', 'true');
+    $(id).textContent = message; $(id).hidden = false; field.focus();
+  }
+
+  /* 会话过期：login.html?expired=1 */
+  if (window.queryOf().get('expired') === '1') setBanner(banners.expired);
+
+  /* 密码可见性 */
+  $('#pwdToggle').addEventListener('click', function () {
+    var show = pwd.type === 'password';
+    pwd.type = show ? 'text' : 'password';
+    this.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+    this.setAttribute('aria-pressed', String(show));
+    this.innerHTML = '<svg class="ic ic-sm"><use href="#' + (show ? 'i-eyeoff' : 'i-eye') + '"/></svg>';
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (btn.disabled) return;
+    setBanner('');
+    clearErrors();
+    if (!acc.value.trim()) { inputError(acc, '#accountError', '请输入管理员账号'); return; }
+    if (!pwd.value) { inputError(pwd, '#passwordError', '请输入演示密码'); return; }
+
+    /* 登录中 → 校验 */
+    setLoading(true);
+    loginTimer = setTimeout(function () {
+      setLoading(false);
+      if (acc.value.trim() === 'admin' && pwd.value === 'chai@2026') {
+        toast('演示校验通过，正在进入原型（未连接真实认证）', 'ok');
+        btn.disabled = true;
+        redirectTimer = setTimeout(function () { window.location.href = 'index.html'; }, 600);
+      } else {
+        setBanner(banners.fail);
+        inputError(pwd, '#passwordError', '演示账号或密码不匹配，请检查后重试');
+        toast('登录失败：账号或密码错误', 'err');
+      }
+    }, 900);
+  });
+
+  function setLoading(on) {
+    btn.classList.toggle('is-loading', on);
+    btn.disabled = on;
+    btn.innerHTML = on
+      ? '<span class="spin"></span>登录中…'
+      : '登 录';
+  }
+
+  /* 原型状态预览 */
+  $$('.sg-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      clearTimeout(loginTimer); clearTimeout(redirectTimer);
+      setBanner('');
+      clearErrors();
+      setLoading(false);
+      var s = b.getAttribute('data-state');
+      if (s === 'loading') { setLoading(true); loginTimer = setTimeout(function () { setLoading(false); }, 1600); }
+      if (s === 'fail') { setBanner(banners.fail); pwd.classList.add('err'); }
+      if (s === 'expired') setBanner(banners.expired);
+    });
+  });
+})();
+</script>
+</body>
+</html>
