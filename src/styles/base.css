@@ -10,7 +10,12 @@
 .nav-pending { border: 0; background: transparent; cursor: not-allowed; color: var(--text-3); }
 .nav-pending:hover { color: var(--text-3); background: transparent; }
 .nav-pending .pending-tag { font-size: 10px; color: var(--text-3); background: var(--fill-1); border-color: var(--border); }
-.app-layout .side-foot { line-height: 1.9; color: var(--text-3); }
+.app-layout .side-foot {
+  line-height: 1.9;
+  color: var(--text-3);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .app-layout .breadcrumb a { color: var(--text-3); }
 .account-menu { position: relative; }
 .admin-toggle { border: 0; background: transparent; font-family: inherit; }
@@ -21,7 +26,7 @@
 .storage-note { margin-bottom: 16px; }
 .app-auth { padding: 32px 16px; }
 .app-auth .auth-card { width: 400px; max-width: 100%; }
-.app-auth .auth-brand .logo-mark { font-size: 18px; color: #fff; border: 0; padding: 0; }
+.app-layout .logo-mark, .app-auth .auth-brand .logo-mark { display: block; object-fit: contain; background: transparent; border-radius: 0; box-shadow: none; border: 0; padding: 0; }
 .app-auth .auth-demo-hint { align-items: flex-start; gap: 6px; text-align: left; line-height: 1.7; }
 .app-auth .auth-demo-hint .ic { margin-top: 3px; }
 .login-input { height: 38px; padding-left: 32px; }
@@ -93,6 +98,15 @@
 .activity-action { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .activity-list .tag { flex: none; }
 .dark-spin { border-color: #D6E9FF; border-top-color: var(--primary); }
+.state-block .state-ic .spin {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #D6E9FF;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
 .load-error { margin-bottom: 16px; }
 .load-error .btn { margin-left: auto; }
 .skeleton-value { display: block; height: 34px; margin-top: 16px; }
@@ -192,6 +206,7 @@
 .ops-service-name p { color: var(--text-3); font-size: 12px; line-height: 1.6; }
 .ops-service-head > .status { white-space: nowrap; font-size: 12px; padding-top: 3px; }
 .ops-service-details { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+.system-page > .card + .card { margin-top: 20px; }
 .ops-version-card { margin-bottom: 20px; }
 .ops-version-card .desc-list { grid-template-columns: 160px minmax(0, 1fr); }
 .ops-guidance-list { padding-left: 18px; list-style: disc; }

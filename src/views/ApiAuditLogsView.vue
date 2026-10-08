@@ -34,6 +34,8 @@ let disposed = false
 function queryError() {
   if (['from', 'to', 'admin', 'type', 'result', 'request', 'id', 'page', 'size'].some(key => Array.isArray(route.query[key]))) return '地址中包含重复参数，请重置筛选。'
   if (!['5', '10', '20'].includes(queryText(route.query.size || '10')) || page.value > 10000) return '分页参数无效，请重置筛选。'
+  if (route.query.type && !auditTypes.includes(queryText(route.query.type))) return '操作类型无效，请重新选择。'
+  if (route.query.result && !['成功', '失败', '限流'].includes(queryText(route.query.result))) return '日志结果无效，请重新选择。'
   return appliedError.value
 }
 async function unauthenticated() {
@@ -116,7 +118,7 @@ onBeforeUnmount(() => { disposed = true; ++generation; controller?.abort() })
         <div class="filter-actions"><button class="btn btn-primary" type="submit" :disabled="loading"><AppIcon name="i-search" size="sm" />查询</button><button class="btn" type="button" @click="resetFilters">重置</button></div>
       </form>
       <p v-show="formError" id="api-logs-filter-error" class="field-error filter-error" role="alert">{{ formError }}</p>
-      <div v-if="hasFilters" class="filter-chips" aria-label="已应用筛选"><span v-if="filters.from || filters.to">日期：{{ filters.from || '不限' }} 至 {{ filters.to || '不限' }}</span><span v-if="filters.admin">管理员：{{ filters.admin }}</span><span v-if="filters.type">类型：{{ filters.type }}</span><span v-if="filters.result">结果：{{ filters.result }}</span><span v-if="filters.request">请求 ID：{{ filters.request }}</span></div>
+      <div v-if="hasFilters" class="filter-chips" aria-label="已应用筛选"><span v-if="filters.from || filters.to">日期：{{ filters.from || '不限' }} 至 {{ filters.to || '不限' }}</span><span v-if="filters.admin">管理员：{{ filters.admin }}</span><span v-if="filters.type">类型：{{ filters.type }}</span><span v-if="filters.result">结果：{{ filters.result }}</span><span v-if="filters.request">请求 ID：{{ filters.request }}</span><button class="btn btn-text btn-sm filter-clear" type="button" @click="resetFilters">清除筛选</button></div>
     </div>
     <div class="card table-card" :aria-busy="loading">
       <div class="table-toolbar"><h2 class="card-title">操作记录 <span class="tag tag-green">真实接口</span></h2><span class="text-3">只读 · 不提供删除或导出</span></div>
@@ -131,3 +133,8 @@ onBeforeUnmount(() => { disposed = true; ++generation; controller?.abort() })
     </AppDialog>
   </section>
 </template>
+
+<style scoped>
+.audit-page .filter-chips { align-items: center; }
+.audit-page .filter-clear { margin-left: auto; }
+</style>

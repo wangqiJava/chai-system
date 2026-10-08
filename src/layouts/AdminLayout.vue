@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import logoUrl from '../assets/logo.png'
 import { authDisplayName, authExpired, authMemoryOnly, authVerified, authModeLabel, checkAuthSession, isDemoMode, signOut } from '../state/auth'
 import { adminSession, adminPhase, adminCheckedAt } from '../state/admin-session'
 import { asAuthError } from '../api/admin-auth'
@@ -99,7 +100,7 @@ onBeforeUnmount(() => {
   <div class="layout app-layout">
     <aside id="admin-sidebar" class="sidebar" :class="{ collapsed, expanded: narrow && narrowExpanded }" aria-label="侧边导航">
       <RouterLink to="/dashboard" class="side-logo" aria-label="柴记账管理后台首页">
-        <span class="logo-mark">柴</span>
+        <img class="logo-mark" :src="logoUrl" width="30" height="30" alt="">
         <span class="logo-text"><b>柴记账</b><i>管理后台</i></span>
       </RouterLink>
       <nav class="side-nav" aria-label="主要导航">
@@ -110,14 +111,14 @@ onBeforeUnmount(() => {
         <template v-for="group in groups" :key="group.title">
           <div class="nav-group">{{ group.title }}</div>
           <template v-for="item in group.items" :key="item.name">
-            <RouterLink v-if="item.to" :to="item.to" class="nav-item" active-class="active" :title="isDemoMode || item.to === '/users' ? item.name : item.to === '/business-data' ? '账本/流水/预算只读，分类管理待接入' : item.to === '/categories' ? '系统分类可管理，用户自建分类只读' : item.to === '/audit-logs' ? '服务端审计日志，只读' : `${item.name}：接口待接入`" :aria-label="item.name"><AppIcon :name="item.icon" /><span>{{ item.name }}</span><span v-if="!isDemoMode && item.to !== '/users' && item.to !== '/audit-logs'" class="nav-tag pending-tag">{{ item.to === '/business-data' || item.to === '/categories' ? '部分接入' : '待接入' }}</span></RouterLink>
+            <RouterLink v-if="item.to" :to="item.to" class="nav-item" active-class="active" :title="isDemoMode || item.to === '/users' ? item.name : item.to === '/business-data' ? '账本/流水/预算只读，金额和备注只读展示' : item.to === '/categories' ? '系统分类可管理，用户自建分类只读' : item.to === '/audit-logs' ? '服务端审计日志，只读' : item.to === '/system-status' ? 'API、MySQL、Redis 实时连通性，只读' : item.to === '/feedback' ? '微信小程序原生反馈，外部渠道处理' : `${item.name}：接口待接入`" :aria-label="item.name"><AppIcon :name="item.icon" /><span>{{ item.name }}</span><span v-if="!isDemoMode && !['/users', '/audit-logs', '/system-status', '/feedback'].includes(item.to || '')" class="nav-tag pending-tag">{{ item.to === '/business-data' ? '已接入 · 只读' : item.to === '/categories' ? '部分可管理' : '待接入' }}</span><span v-else-if="!isDemoMode && item.to === '/feedback'" class="nav-tag external-tag">外部渠道</span></RouterLink>
             <button v-else class="nav-item nav-pending" type="button" disabled :title="`${item.name}：待后续开发`" :aria-label="`${item.name}，待开发`">
               <AppIcon :name="item.icon" /><span>{{ item.name }}</span><span class="nav-tag pending-tag">待开发</span>
             </button>
           </template>
         </template>
       </nav>
-      <div class="side-foot">v0.1.0 · {{ authModeLabel }}<br>{{ isDemoMode ? '管理页面已齐 · 真实接口待接入' : '用户 / 账本 / 流水 / 预算 / 分类 / 审计日志' }}</div>
+      <div class="side-foot">v0.1.0 · {{ authModeLabel }}<br>{{ isDemoMode ? '管理页面已齐 · 真实接口待接入' : '用户 / 账本 / 流水 / 预算 / 分类 / 审计日志 / 系统状态 / 微信反馈' }}</div>
     </aside>
 
     <div class="main">

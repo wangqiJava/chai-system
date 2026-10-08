@@ -14,14 +14,14 @@ export default defineConfig(({ command, mode }) => {
   }
   return {
   plugins: [vue()],
-  base: command === 'build' && authMode === 'api' ? '/admin/' : '/',
+  base: '/',
   define: { 'import.meta.env.VITE_AUTH_MODE': JSON.stringify(authMode) },
   build: { emptyOutDir: false },
   server: {
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
-    ...(authMode === 'api' && target ? { proxy: { '/api/v1/admin/auth': { target, changeOrigin: true }, '/api/v1/admin/users': { target, changeOrigin: true }, '/api/v1/admin/ledgers': { target, changeOrigin: true }, '/api/v1/admin/transactions': { target, changeOrigin: true }, '/api/v1/admin/budgets': { target, changeOrigin: true }, '/api/v1/admin/categories': { target, changeOrigin: true }, '/api/v1/admin/audit-logs': { target, changeOrigin: true } } } : {}),
+    ...(authMode === 'api' && target ? { proxy: { '/api/v1/admin/auth': { target, changeOrigin: true }, '/api/v1/admin/users': { target, changeOrigin: true }, '/api/v1/admin/ledgers': { target, changeOrigin: true }, '/api/v1/admin/transactions': { target, changeOrigin: true }, '/api/v1/admin/budgets': { target, changeOrigin: true }, '/api/v1/admin/categories': { target, changeOrigin: true }, '/api/v1/admin/audit-logs': { target, changeOrigin: true }, '/api/v1/admin/system-status': { target, changeOrigin: true }, '/api/v1/admin/overview': { target, changeOrigin: true } } } : {}),
   },
   preview: {
     host: '127.0.0.1',

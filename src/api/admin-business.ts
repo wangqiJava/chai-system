@@ -1,8 +1,8 @@
 import { isUserDate, isUserId } from './admin-users'
 
 export interface AdminLedger { id: string; userId: string; userNickname: string | null; name: string; isDefault: boolean; createdAt: string; updatedAt: string; transactionCount: number }
-export interface AdminTransaction { id: string; userId: string; userNickname: string | null; ledgerId: string; ledgerName: string; categoryId: string; categoryName: string | null; categoryStatus: 'active' | 'inactive' | 'deleted'; type: 'INCOME' | 'EXPENSE'; date: string; createdAt: string; updatedAt: string }
-export interface AdminBudget { id: string; userId: string; userNickname: string | null; ledgerId: string; ledgerName: string; month: string; categoryId: string | null; categoryName: string | null; categoryStatus: 'total' | 'active' | 'inactive' | 'deleted'; createdAt: string; updatedAt: string }
+export interface AdminTransaction { id: string; userId: string; userNickname: string | null; ledgerId: string; ledgerName: string; categoryId: string; categoryName: string | null; categoryStatus: 'active' | 'inactive' | 'deleted'; type: 'INCOME' | 'EXPENSE'; amount: string; remark: string | null; date: string; createdAt: string; updatedAt: string }
+export interface AdminBudget { id: string; userId: string; userNickname: string | null; ledgerId: string; ledgerName: string; month: string; categoryId: string | null; categoryName: string | null; categoryStatus: 'total' | 'active' | 'inactive' | 'deleted'; amount: string; spent: string; remaining: string; createdAt: string; updatedAt: string }
 export interface BusinessPage<T> { items: T[]; total: number; page: number; size: number }
 export interface LedgerQuery { user?: string; keyword?: string; page: number; size: number }
 export interface TransactionQuery { user?: string; ledger?: string; category?: string; type?: 'INCOME' | 'EXPENSE'; from?: string; to?: string; page: number; size: number }
@@ -20,6 +20,8 @@ function object(value: unknown): value is Record<string, unknown> { return Boole
 const count = (value: unknown) => Number.isSafeInteger(value) && Number(value) >= 0
 const text = (value: unknown): value is string => typeof value === 'string' && Array.from(value).length <= 64
 const nullableText = (value: unknown) => value === null || text(value)
+const nullableRemark = (value: unknown) => value === null || typeof value === 'string'
+const money = (value: unknown, negative = false) => typeof value === 'string' && new RegExp(`^${negative ? '-?' : ''}(?:0|[1-9][0-9]*)(?:\\.[0-9]{2})$`).test(value)
 const uuid = (value: unknown) => typeof value === 'string' && isUserId(value)
 const timestamp = (value: unknown) => typeof value === 'string' && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value
 const fields = (value: Record<string, unknown>, keys: string[]) => Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key))
@@ -28,11 +30,11 @@ function ledger(value: unknown): AdminLedger {
   return value as unknown as AdminLedger
 }
 function transaction(value: unknown): AdminTransaction {
-  if (!object(value) || !fields(value, ['id', 'userId', 'userNickname', 'ledgerId', 'ledgerName', 'categoryId', 'categoryName', 'categoryStatus', 'type', 'date', 'createdAt', 'updatedAt']) || !uuid(value.id) || !uuid(value.userId) || !uuid(value.ledgerId) || !uuid(value.categoryId) || !nullableText(value.userNickname) || !text(value.ledgerName) || !['active', 'inactive', 'deleted'].includes(String(value.categoryStatus)) || !(value.categoryStatus === 'deleted' ? value.categoryName === null : text(value.categoryName)) || !['INCOME', 'EXPENSE'].includes(String(value.type)) || typeof value.date !== 'string' || !isUserDate(value.date) || !timestamp(value.createdAt) || !timestamp(value.updatedAt)) throw new AdminBusinessError('invalid-response')
+  if (!object(value) || !fields(value, ['id', 'userId', 'userNickname', 'ledgerId', 'ledgerName', 'categoryId', 'categoryName', 'categoryStatus', 'type', 'amount', 'remark', 'date', 'createdAt', 'updatedAt']) || !uuid(value.id) || !uuid(value.userId) || !uuid(value.ledgerId) || !uuid(value.categoryId) || !nullableText(value.userNickname) || !text(value.ledgerName) || !['active', 'inactive', 'deleted'].includes(String(value.categoryStatus)) || !(value.categoryStatus === 'deleted' ? value.categoryName === null : text(value.categoryName)) || !['INCOME', 'EXPENSE'].includes(String(value.type)) || !money(value.amount) || !nullableRemark(value.remark) || typeof value.date !== 'string' || !isUserDate(value.date) || !timestamp(value.createdAt) || !timestamp(value.updatedAt)) throw new AdminBusinessError('invalid-response')
   return value as unknown as AdminTransaction
 }
 function budget(value: unknown): AdminBudget {
-  if (!object(value) || !fields(value, ['id', 'userId', 'userNickname', 'ledgerId', 'ledgerName', 'month', 'categoryId', 'categoryName', 'categoryStatus', 'createdAt', 'updatedAt']) || !uuid(value.id) || !uuid(value.userId) || !uuid(value.ledgerId) || !nullableText(value.userNickname) || !text(value.ledgerName) || !/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(String(value.month)) || !(value.categoryId === null || uuid(value.categoryId)) || !['total', 'active', 'inactive', 'deleted'].includes(String(value.categoryStatus)) || !timestamp(value.createdAt) || !timestamp(value.updatedAt)) throw new AdminBusinessError('invalid-response')
+  if (!object(value) || !fields(value, ['id', 'userId', 'userNickname', 'ledgerId', 'ledgerName', 'month', 'categoryId', 'categoryName', 'categoryStatus', 'amount', 'spent', 'remaining', 'createdAt', 'updatedAt']) || !uuid(value.id) || !uuid(value.userId) || !uuid(value.ledgerId) || !nullableText(value.userNickname) || !text(value.ledgerName) || !/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(String(value.month)) || !(value.categoryId === null || uuid(value.categoryId)) || !['total', 'active', 'inactive', 'deleted'].includes(String(value.categoryStatus)) || !money(value.amount) || !money(value.spent) || !money(value.remaining, true) || !timestamp(value.createdAt) || !timestamp(value.updatedAt)) throw new AdminBusinessError('invalid-response')
   const categoryValid = value.categoryStatus === 'total' ? value.categoryId === null && value.categoryName === null : value.categoryStatus === 'deleted' ? value.categoryId !== null && value.categoryName === null : value.categoryId !== null && text(value.categoryName)
   if (!categoryValid) throw new AdminBusinessError('invalid-response')
   return value as unknown as AdminBudget

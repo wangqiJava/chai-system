@@ -151,7 +151,7 @@ onBeforeUnmount(() => { disposed = true; ++listGeneration; ++detailGeneration; l
         <div class="detail-user-head"><span class="avatar avatar-lg" aria-hidden="true">{{ initial(detail) }}</span><div><h3>{{ name(detail) }}</h3><span class="tag tag-gray">只读基本资料</span></div></div>
         <section class="d-section"><h3 class="d-section-title">基本资料</h3><dl class="desc-list"><dt>用户 ID</dt><dd class="num">{{ detail.id }}</dd><dt>昵称</dt><dd>{{ name(detail) }}</dd><dt>注册时间（UTC）</dt><dd>{{ time(detail.createdAt) }}</dd><dt>资料更新时间（UTC）</dt><dd>{{ time(detail.updatedAt) }}</dd><dt>未删除账本数</dt><dd>{{ detail.ledgerCount }}</dd><dt>有效记账数</dt><dd>{{ detail.transactionCount }}</dd></dl></section>
         <div class="api-user-related"><RouterLink class="btn btn-sm" :to="{ name: 'business-data', query: { tab: 'ledgers', user: detail.id } }">查看用户账本</RouterLink><RouterLink class="btn btn-sm" :to="{ name: 'business-data', query: { tab: 'records', user: detail.id } }">查看用户流水</RouterLink><RouterLink class="btn btn-sm" :to="{ name: 'business-data', query: { tab: 'budgets', user: detail.id } }">查看用户预算</RouterLink></div>
-        <p class="detail-note">不返回 OpenID、UnionID、财务金额、预算金额和备注；不读取最近登录记录，不推断封禁状态。用户查询尚未接入业务访问审计，不能用登录审计替代。</p>
+        <p class="detail-note">不返回 OpenID、UnionID、财务金额、预算金额和备注；不读取最近登录记录，不推断封禁状态。用户查询访问行为由服务端业务审计记录。</p>
       </div>
     </AppDialog>
   </section>

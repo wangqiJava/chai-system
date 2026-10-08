@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import logoUrl from '../assets/logo.png'
 import { isDemoMode, authModeLabel, signIn, signOut } from '../state/auth'
 import { cancelAdminLogin } from '../state/admin-session'
 import { asAuthError } from '../api/admin-auth'
@@ -87,7 +88,7 @@ onBeforeUnmount(() => { disposed = true; clearTimeout(loginTimer); clearInterval
 
 <template>
   <div class="auth-page app-auth">
-    <div class="auth-brand"><span class="logo-mark">柴</span><b>柴记账</b><span>管理后台</span></div>
+    <div class="auth-brand"><img class="logo-mark" :src="logoUrl" width="36" height="36" alt=""><b>柴记账</b><span>管理后台</span></div>
     <main class="auth-card" aria-labelledby="login-title">
       <h1 id="login-title" class="auth-title">管理员登录</h1>
       <div class="auth-sub"><AppIcon name="i-lock" />仅限管理员 · {{ authModeLabel }}</div>
@@ -112,7 +113,7 @@ onBeforeUnmount(() => { disposed = true; clearTimeout(loginTimer); clearInterval
         <button class="btn btn-primary btn-lg btn-block" type="submit" :disabled="loading || retrySeconds > 0"><span v-if="loading" class="spin" aria-hidden="true"></span>{{ loading ? (isDemoMode ? '正在进入…' : '正在验证…') : retrySeconds ? `请等待 ${retrySeconds} 秒` : isDemoMode ? '进入演示后台' : '登录管理后台' }}</button>
       </form>
       <div id="login-instructions" class="auth-demo-hint"><AppIcon name="i-info" size="sm" /><span v-if="isDemoMode">账号 <b class="num">demo-admin</b>；口令自行填写，仅检查长度，不发送或保存。</span><span v-else>仅使用已由管理员初始化的账号。密码只发送到本站认证接口，不写入应用存储。</span></div>
-      <div v-if="isDemoMode" class="auth-foot">当前未连接真实认证或业务接口。<br>本地演示会话有效期 30 分钟，不构成访问控制。</div><div v-else class="auth-foot">身份与会话由服务端验证，接口不可用时不会回退到演示。<br>当前仅接通认证，业务模块仍待接入。</div>
+      <div v-if="isDemoMode" class="auth-foot">当前未连接真实认证或业务接口。<br>本地演示会话有效期 30 分钟，不构成访问控制。</div><div v-else class="auth-foot">身份与会话由服务端验证，接口不可用时不会回退到演示。<br>业务查询、分类、审计和系统状态已接入；用户反馈通过微信外部渠道处理。</div>
     </main>
     <p class="app-auth-footer">柴记账 · 管理后台 v0.1.0 · {{ authModeLabel }}</p>
   </div>
